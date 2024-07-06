@@ -1,0 +1,12 @@
+{
+  "name": "image-resizing",
+  "version": "1.0.0",
+  "description": "Image resizing",
+  "scripts": {
+    "server": "echo \"Starting server...\"",
+    "worker": "echo \"Starting worker...\"",
+    "frontend": "echo \"Starting frontend...\""
+  },
+  "author": "Zeljko",
+  "license": "ISC"
+}
