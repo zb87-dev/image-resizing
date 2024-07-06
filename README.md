@@ -32,9 +32,10 @@ CONNECTION LIMIT = -1
 IS_TEMPLATE = False;
 ```
 
-## 2. Environment
+## 2. Environment setup
 
-Enter inside the api folder and copy sample.env into .env file and adjust values accordingly.
+Open **api** folder and copy sample.env into .env file and adjust values accordingly.
+Do the same for the **worker** project.
 
 ## 3. NodeJS version
 
@@ -58,3 +59,9 @@ This command will install api and run database setup.
 In order to run the server, execute the following command:
 
 > npm run server
+
+## 6. Run the worker
+
+In the separate terminal(s), start the worker(s) using the following command
+
+> npm run worker

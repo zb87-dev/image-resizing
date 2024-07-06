@@ -39,6 +39,33 @@ const convictSchema = convict({
       default: '',
     },
   },
+  aws: {
+    region: {
+      doc: 'AWS region',
+      env: 'AWS_REGION',
+      default: '',
+    },
+    accessKeyId: {
+      doc: 'AWS access key id',
+      env: 'AWS_ACCESS_KEY_ID',
+      default: '',
+    },
+    secretAccessKey: {
+      doc: 'AWS secret access key',
+      env: 'AWS_SECRET_ACCESS_KEY',
+      default: '',
+    },
+    bucketName: {
+      doc: 'AWS S3 bucket name',
+      env: 'AWS_BUCKET_NAME',
+      default: '',
+    },
+    sqsUrl: {
+      doc: 'AWS SQS URL',
+      env: 'AWS_SQS_URL',
+      default: '',
+    },
+  },
 });
 
 convictSchema.validate({ allowed: 'strict' });
