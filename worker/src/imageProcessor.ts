@@ -1,4 +1,5 @@
 import { IImageResizer } from "./imageResizer";
+import { IMessageBroker } from "./messageBroker";
 import { IUploader } from "./uploader";
 
 export interface IImageProcessor {
@@ -7,17 +8,22 @@ export interface IImageProcessor {
 
 export class ImageProcessor implements IImageProcessor {
   constructor(
+    private readonly messageBroker: IMessageBroker,
     private readonly imageResizer: IImageResizer,
     private readonly uploader: IUploader
   ) {}
 
-  async processImage(imageDetails: any): Promise<boolean> {
+  async processImage(message: any): Promise<boolean> {
     var resizedImage = "";
     try {
+      console.log("Processing image:", message.Body);
       //Process the message
-      resizedImage = await this.imageResizer.resizeImage(imageDetails.imageUrl);
+      resizedImage = await this.imageResizer.resizeImage(message.imageUrl);
     } catch (error) {
-      // await this.setImageProcessingFailure({ imageDetails, error });
+      await this.messageBroker.setImageProcessingFailure({
+        message,
+        error,
+      });
       console.error("Error processing image:", error);
       return false;
     }
@@ -30,7 +36,7 @@ export class ImageProcessor implements IImageProcessor {
       return true;
     } catch (error) {
       console.error("Error processing image:", error);
-      // await this.setImageProcessingFailure({ imageDetails, error });
+      await this.messageBroker.setImageProcessingFailure({ message, error });
       return false;
     }
   }

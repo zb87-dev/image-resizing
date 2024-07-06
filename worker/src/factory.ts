@@ -24,6 +24,7 @@ export class Factory {
 
   static createImageProcessor(): IImageProcessor {
     return new ImageProcessor(
+      Factory.createMessageBroker(),
       Factory.createImageResizer(),
       Factory.createImageUploader()
     );

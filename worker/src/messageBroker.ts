@@ -1,6 +1,7 @@
 import { SQS } from "aws-sdk";
 
 export interface IMessageBroker {
+  setImageProcessingFailure(param: { message: any; error: any }): Promise<void>;
   listenForProcessingRequests(): Promise<any>;
   deleteMessage(receiptHandle: string): Promise<any>;
 }
@@ -22,6 +23,17 @@ export class SQSMessageBroker implements IMessageBroker {
 
     this.processRequestQueueUrl = process.env.AWS_PROCESS_REQUEST_SQS_URL || "";
     this.failedRequestsQueueUrl = process.env.AWS_FAILED_REQUEST_SQS_URL || "";
+  }
+  async setImageProcessingFailure(param: {
+    message: any;
+    error: any;
+  }): Promise<any> {
+    return this.sqs
+      .sendMessage({
+        QueueUrl: this.failedRequestsQueueUrl,
+        MessageBody: JSON.stringify(param),
+      })
+      .promise();
   }
 
   async listenForProcessingRequests(): Promise<any> {
