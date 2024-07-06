@@ -9,7 +9,7 @@ Solution for image resizing using Amazon SQS
 Create owner of the PostgreSQL database
 
 ```
-CREATE ROLE image_resizing_dev WITH
+CREATE ROLE [role-name] WITH
 LOGIN
 SUPERUSER
 CREATEDB
@@ -17,15 +17,15 @@ CREATEROLE
 INHERIT
 NOREPLICATION
 CONNECTION LIMIT -1
-PASSWORD 'image_resizing_dev';
+PASSWORD '[user-password]';
 ```
 
 Create database and assign previously created owner to it
 
 ```
-CREATE DATABASE image_resizing_dev
+CREATE DATABASE [database-name]
 WITH
-OWNER = image_resizing_dev
+OWNER = [role-name]
 ENCODING = 'UTF8'
 LOCALE_PROVIDER = 'icu'
 CONNECTION LIMIT = -1
