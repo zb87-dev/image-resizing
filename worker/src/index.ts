@@ -4,6 +4,5 @@ import { Factory } from "./factory";
 
 dotenv.config();
 
-const imageProcessor = Factory.createImageProcessor();
-const worker = new ImageProcessorWorker(imageProcessor);
+const worker = Factory.createWorker();
 worker.start();
