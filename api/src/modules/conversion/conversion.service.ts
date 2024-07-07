@@ -20,7 +20,11 @@ export class ConversionService {
     private readonly conversionTaskRepository: ConversionTaskRepository,
   ) {}
 
-  public async upload(userId: string, resolutions: string[], files: Multer.File[]): Promise<any> {
+  public async createConversion(
+    userId: string,
+    resolutions: string[],
+    files: Multer.File[],
+  ): Promise<any> {
     let user = await this.userService.getUserById(userId);
     if (!user) {
       this.logger.debug(`User with id ${userId} not found, creating new user`);

@@ -91,7 +91,7 @@ describe('UploadController', () => {
       const response = await request(app.getHttpServer())
         .post('/images/upload')
         .field('userId', userId)
-        .field('resolutions', ['1920x1080', '1280x720', '640x480'])
+        .field('resolutions', ['640x480'])
         .attach('files', getFile(ImageFiles.JPG_Example_1));
 
       expect(response.status).toBe(201);

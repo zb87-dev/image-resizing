@@ -25,7 +25,7 @@ export class ConversionController {
   private readonly SUPPORTED_FILE_TYPES = ['image/jpeg', 'image/png'];
   private readonly TEMP_FOLDER = join(__dirname, '.', 'tempUploads');
 
-  constructor(private readonly uploadService: ConversionService) {}
+  constructor(private readonly conversionService: ConversionService) {}
 
   @Post('upload')
   @HttpCode(HttpStatus.CREATED)
@@ -46,12 +46,15 @@ export class ConversionController {
   )
   async uploadFiles(
     @Body('userId') userId: string,
-    @Body('resolutions') resolutions: string[],
+    @Body('resolutions') resolutions: string | string[],
     @UploadedFiles() files: Multer.File[],
   ) {
-    this.validateFiles(resolutions, files);
+    // Ensure resolutions is an array of strings
+    const resolutionsArray = typeof resolutions === 'string' ? resolutions.split(',') : resolutions;
 
-    const result = await this.uploadService.upload(userId, resolutions, files);
+    this.validateFiles(resolutionsArray, files);
+
+    const result = await this.conversionService.createConversion(userId, resolutionsArray, files);
     if (!result) {
       throw new InternalServerErrorException(`Failed to upload files. Please try again later.`);
     }
