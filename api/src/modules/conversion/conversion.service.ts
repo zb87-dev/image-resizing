@@ -1,6 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { v4 as uuidv4 } from 'uuid';
 import { SQSService } from './sqs.service';
 import { AppConfigService } from '../../config/app-config.service';
+import { UserService } from '../user/user.service';
 
 @Injectable()
 export class ConversionService {
@@ -8,6 +10,7 @@ export class ConversionService {
     private readonly appConfig: AppConfigService,
     private readonly sqsService: SQSService,
     private readonly logger: Logger,
+    private readonly userService: UserService,
   ) {}
 
   public async upload(): Promise<any> {
