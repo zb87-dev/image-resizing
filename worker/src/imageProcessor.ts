@@ -26,7 +26,11 @@ export class ImageProcessor implements IImageProcessor {
       // Resize the image
       const resizedImage = await this.imageResizer.resizeImage(imageData);
 
-      const messageToSend = { ...resizedImage, target: "server" };
+      const messageToSend = {
+        ...resizedImage,
+        target: "server",
+        status: "finished",
+      };
       await this.messageBroker.sendImageProcessingUpdate({
         message: messageToSend,
       });

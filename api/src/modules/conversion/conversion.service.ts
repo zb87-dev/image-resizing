@@ -18,6 +18,7 @@ interface ConversionUpdate {
   filePath: string;
   mimeType: string;
   convertedFilePath: string;
+  status: string;
 }
 
 @Injectable()
@@ -64,7 +65,7 @@ export class ConversionService implements OnModuleInit {
 
             const task = await this.conversionTaskRepository.getTaskById(message.taskId);
             task.convertedFilePath = message.convertedFilePath;
-            task.status = 'finished';
+            task.status = message.status;
             await this.conversionTaskRepository.save(task);
           }
 
