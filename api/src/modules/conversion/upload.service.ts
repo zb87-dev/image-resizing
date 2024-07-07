@@ -21,7 +21,7 @@ export class UploadService {
     const fileContent = await this.readFileFromDisk(file);
     const uploadParams = {
       Bucket: this.bucketName,
-      Key: `${path}/${file.originalname}`,
+      Key: `${path}`,
       Body: fileContent,
       ContentType: file.mimetype,
     };

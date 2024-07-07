@@ -1,4 +1,5 @@
 import { IImageResizer } from "./imageResizer";
+import { ImageProcessingData } from "./interfaces";
 import { IMessageBroker } from "./messageBroker";
 import { IUploader } from "./uploader";
 
@@ -21,9 +22,10 @@ export class ImageProcessor implements IImageProcessor {
 
     var resizedImage = "";
     try {
-      console.log("\n\nProcessing image:", message.Body);
-      //Process the message
-      resizedImage = await this.imageResizer.resizeImage(message.imageUrl);
+      const imageData: ImageProcessingData = JSON.parse(message.Body);
+
+      // Resize the image
+      resizedImage = await this.imageResizer.resizeImage(imageData);
     } catch (error) {
       await this.messageBroker.setImageProcessingFailure({
         message,

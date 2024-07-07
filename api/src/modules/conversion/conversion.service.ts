@@ -57,6 +57,7 @@ export class ConversionService {
             fileName: file.originalname,
             resolution: resolution,
             filePath: createRequest.filePath,
+            mimeType: file.mimetype,
           };
           messages.push(message);
         });
