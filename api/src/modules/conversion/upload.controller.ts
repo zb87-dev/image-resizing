@@ -22,6 +22,7 @@ import { v4 as uuidv4 } from 'uuid';
 export class UploadController {
   private readonly MIN_FILES = 1;
   private readonly MAX_FILES = 5;
+  private readonly SUPPORTED_FILE_TYPES = ['image/jpeg', 'image/png'];
   private readonly TEMP_FOLDER = join(__dirname, '.', 'tempUploads');
 
   constructor(private readonly uploadService: ConversionService) {}
@@ -43,6 +44,18 @@ export class UploadController {
     }),
   )
   async uploadFiles(@Body('userId') userId: string, @UploadedFiles() files: Multer.File[]) {
+    this.validateFiles(files);
+
+    const success = await this.uploadService.upload(userId, files);
+    if (!success) {
+      throw new InternalServerErrorException(`Failed to upload files. Please try again later.`);
+    }
+
+    this.deleteFiles(files);
+    return { success: true };
+  }
+
+  private validateFiles(files: Multer.File[]): void {
     if (files.length < this.MIN_FILES || files.length > this.MAX_FILES) {
       // Clean up temporary created files before throwing an exception
       this.deleteFiles(files);
@@ -52,13 +65,12 @@ export class UploadController {
       );
     }
 
-    const success = await this.uploadService.upload(userId, files);
-    if (!success) {
-      throw new InternalServerErrorException(`Failed to upload files. Please try again later.`);
-    }
-
-    this.deleteFiles(files);
-    return { success: true };
+    files.forEach((file) => {
+      if (!this.SUPPORTED_FILE_TYPES.includes(file.mimetype)) {
+        this.deleteFiles(files);
+        throw new BadRequestException(`File type ${file.mimetype} is not supported.`);
+      }
+    });
   }
 
   private async deleteFiles(files: Multer.File[]): Promise<void> {
