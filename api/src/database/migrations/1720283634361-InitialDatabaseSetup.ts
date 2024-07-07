@@ -1,28 +1,5 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-// user:
-// 	- userId
-// 	- createdAt
-
-// user_file_uploads
-// 	- id
-// 	- userId
-// 	- fileId
-// 	- fileSize
-// 	- fileType (png, jpg)
-// 	- conversionRequests text (multiple resolution types)
-// 	- s3Path
-// 	- createdAt
-
-// conversion_result
-// 	- id
-// 	- userId
-// 	- fileId
-// 	- conversionResult
-// 	- status
-// 	- createdAt
-// 	- updatedAt
-
 export class InitialDatabaseSetup1720283634361 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`);
@@ -41,7 +18,7 @@ export class InitialDatabaseSetup1720283634361 implements MigrationInterface {
         "fileSize" integer NOT NULL,
         "fileType" text NOT NULL,
         "conversionRequestInfo" jsonb NOT NULL,
-        "sourcePath" text NOT NULL,
+        "filePath" text NOT NULL,
         "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
         PRIMARY KEY ("id"),
         CONSTRAINT "FK_conversion_request_userId"
@@ -53,40 +30,41 @@ export class InitialDatabaseSetup1720283634361 implements MigrationInterface {
         CREATE INDEX IF NOT EXISTS "idx_conversion_request_userId" on "conversion_request" ("userId")`);
 
     await queryRunner.query(`
-      CREATE TABLE IF NOT EXISTS "conversion_result" (
+      CREATE TABLE IF NOT EXISTS "conversion_task" (
         "id" uuid NOT NULL DEFAULT uuid_generate_v4(),
         "userId" uuid NOT NULL,
         "requestId" uuid NOT NULL,
         "conversionRequestInfo" jsonb NOT NULL,
         "status" text NOT NULL,
+        "convertedFilePath" text,
         "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
         "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
         PRIMARY KEY ("id"),
-        CONSTRAINT "FK_conversion_result_userId"
+        CONSTRAINT "FK_conversion_task_userId"
           FOREIGN KEY ("userId")
           REFERENCES "user"("id") ON DELETE CASCADE,
-        CONSTRAINT "FK_conversion_result_requestId"
+        CONSTRAINT "FK_conversion_task_requestId"
           FOREIGN KEY ("requestId")
           REFERENCES "conversion_request"("id") ON DELETE CASCADE
         )`);
 
     await queryRunner.query(`
-        CREATE INDEX IF NOT EXISTS "idx_conversion_result_userId"
-        ON "conversion_result" ("userId");
+        CREATE INDEX IF NOT EXISTS "idx_conversion_task_userId"
+        ON "conversion_task" ("userId");
       `);
 
     await queryRunner.query(`
-        CREATE INDEX IF NOT EXISTS "idx_conversion_result_requestId"
-        ON "conversion_result" ("requestId");
+        CREATE INDEX IF NOT EXISTS "idx_conversion_task_requestId"
+        ON "conversion_task" ("requestId");
       `);
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`DROP INDEX "idx_conversion_request_userId"`);
-    await queryRunner.query(`DROP INDEX "idx_conversion_result_userId"`);
-    await queryRunner.query(`DROP INDEX "idx_conversion_result_requestId"`);
+    await queryRunner.query(`DROP INDEX "idx_conversion_task_userId"`);
+    await queryRunner.query(`DROP INDEX "idx_conversion_task_requestId"`);
 
-    await queryRunner.query(`DROP TABLE "conversion_result"`);
+    await queryRunner.query(`DROP TABLE "conversion_task"`);
     await queryRunner.query(`DROP TABLE "conversion_request"`);
     await queryRunner.query(`DROP TABLE "user"`);
   }

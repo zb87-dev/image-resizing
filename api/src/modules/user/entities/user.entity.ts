@@ -10,5 +10,5 @@ export class User {
   public id: string;
 
   @Column({ type: 'timestamptz' })
-  public createdAt: Date;
+  public createdAt?: Date;
 }

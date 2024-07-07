@@ -9,4 +9,8 @@ export class UserService {
   public async getUserById(userId: string): Promise<User> {
     return this.userRepository.getUserById(userId);
   }
+
+  public async createUser(userId: string): Promise<User> {
+    return this.userRepository.createUser({ id: userId });
+  }
 }

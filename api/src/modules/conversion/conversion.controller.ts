@@ -14,12 +14,12 @@ import { ConversionService } from './conversion.service';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import * as Multer from 'multer';
 import { join } from 'path';
-import { unlinkSync, unlink } from 'fs';
+import { unlink } from 'fs';
 import { v4 as uuidv4 } from 'uuid';
 
 @Controller('images')
 @ApiTags('Images')
-export class UploadController {
+export class ConversionController {
   private readonly MIN_FILES = 1;
   private readonly MAX_FILES = 5;
   private readonly SUPPORTED_FILE_TYPES = ['image/jpeg', 'image/png'];
@@ -28,15 +28,16 @@ export class UploadController {
   constructor(private readonly uploadService: ConversionService) {}
 
   @Post('upload')
-  @HttpCode(HttpStatus.OK)
+  @HttpCode(HttpStatus.CREATED)
   @ApiResponse({
-    status: 201,
+    status: 200,
     description: 'Returns value indicating that the upload was successful.',
   })
   @UseInterceptors(
     FilesInterceptor('files', null, {
       storage: Multer.diskStorage({
-        destination: join(__dirname, '.', 'tempUploads'), // This is needed temporarily to store the files before upload
+        // This is needed temporarily to store the files before upload
+        destination: join(__dirname, '.', 'tempUploads'),
         filename: (_, file, cb) => {
           cb(null, `${uuidv4()}-${file.originalname}`);
         },
@@ -46,17 +47,18 @@ export class UploadController {
   async uploadFiles(@Body('userId') userId: string, @UploadedFiles() files: Multer.File[]) {
     this.validateFiles(files);
 
-    const success = await this.uploadService.upload(userId, files);
-    if (!success) {
+    const resolutions = ['1920x1080', '1280x720', '640x480'];
+    const result = await this.uploadService.upload(userId, resolutions, files);
+    if (!result) {
       throw new InternalServerErrorException(`Failed to upload files. Please try again later.`);
     }
 
     this.deleteFiles(files);
-    return { success: true };
+    return result;
   }
 
   private validateFiles(files: Multer.File[]): void {
-    if (files.length < this.MIN_FILES || files.length > this.MAX_FILES) {
+    if (!files || files.length < this.MIN_FILES || files.length > this.MAX_FILES) {
       // Clean up temporary created files before throwing an exception
       this.deleteFiles(files);
 
@@ -74,6 +76,10 @@ export class UploadController {
   }
 
   private async deleteFiles(files: Multer.File[]): Promise<void> {
+    if (!files) {
+      return;
+    }
+
     files.forEach((file) => {
       const filePath = join(this.TEMP_FOLDER, file.filename);
       unlink(filePath, (err) => {
