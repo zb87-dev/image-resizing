@@ -10,6 +10,24 @@
       "request": "attach",
       "skipFiles": ["<node_internals>/**"],
       "type": "node"
+    },
+    {
+      "name": "Debug Jest Test",
+      "type": "node",
+      "request": "launch",
+      "env": {
+        "NODE_ENV": "test"
+      },
+      "runtimeArgs": [
+        "--inspect-brk",
+        "${workspaceRoot}/api/node_modules/.bin/jest",
+        "--config=${workspaceRoot}/api/test/jest-e2e.json",
+        "${fileBasenameNoExtension}",
+        "--runInBand",
+        "--coverage",
+        "false"
+      ],
+      "console": "integratedTerminal"
     }
   ]
 }

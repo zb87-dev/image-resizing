@@ -65,3 +65,9 @@ In order to run the server, execute the following command:
 In the separate terminal(s), start the worker(s) using the following command
 
 > npm run worker
+
+## Running e2e tests
+
+In order to run e2e tests, open **api** folder and create test.env with appropriate values. Then you can run
+
+> npm run test:e2e
