@@ -59,6 +59,10 @@ export class SQSMessageBroker implements IMessageBroker {
   }
 
   async deleteMessage(message: any): Promise<any> {
+    if (!message) {
+      return;
+    }
+
     return this.sqs
       .deleteMessage({
         QueueUrl: this.processRequestQueueUrl,

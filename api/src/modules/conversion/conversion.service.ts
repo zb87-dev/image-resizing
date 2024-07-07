@@ -20,37 +20,6 @@ export class ConversionService {
     private readonly conversionTaskRepository: ConversionTaskRepository,
   ) {}
 
-  private async createConversionRequest(userId: string, resolutions: string[], file: Multer.File) {
-    const conversionRequestId = uuidv4();
-    const s3Path = `users/${userId}/${conversionRequestId}/${file.originalname}`;
-    const request = {
-      id: conversionRequestId,
-      userId: userId,
-      fileName: file.originalname,
-      fileSize: file.size,
-      fileType: file.mimetype,
-      conversionRequestInfo: {
-        resolutions,
-      },
-      filePath: `${s3Path}`,
-    };
-
-    return this.convesrioRequestRepository.createRequest(request);
-  }
-
-  private async createConversionTask(userId: string, requestId: string, resolution: string) {
-    const conversionTaskId = uuidv4();
-    return this.conversionTaskRepository.createTask({
-      id: conversionTaskId,
-      userId: userId,
-      requestId: requestId,
-      conversionRequestInfo: {
-        resolution,
-      },
-      status: 'pending',
-    });
-  }
-
   public async createConversion(
     userId: string,
     resolutions: string[],
@@ -67,13 +36,20 @@ export class ConversionService {
       error: [],
     };
 
-    for (const file of files) {
+    let imageRequests = [];
+    let tasks = [];
+    let messages = [];
+
+    const uploadPromises = files.map(async (file) => {
       try {
-        const createRequest = await this.createConversionRequest(userId, resolutions, file);
-        for (const resolution of resolutions) {
-          const task = await this.createConversionTask(userId, createRequest.id, resolution);
-          await this.uploadFileToS3(createRequest.filePath, file);
-          uploadResult.success.push(file.originalname);
+        const createRequest = this.createConversionRequest(userId, resolutions, file);
+        imageRequests.push(createRequest);
+        await this.uploadFileToS3(createRequest.filePath, file);
+        uploadResult.success.push(file.originalname);
+
+        const resolutionPromises = resolutions.map(async (resolution) => {
+          const task = this.createConversionTask(userId, createRequest.id, resolution);
+          tasks.push(task);
           const message = {
             userId: userId,
             requestId: createRequest.id,
@@ -82,15 +58,62 @@ export class ConversionService {
             resolution: resolution,
             filePath: createRequest.filePath,
           };
-          await this.sendMessage(message);
-        }
+          messages.push(message);
+        });
+
+        await Promise.all(resolutionPromises);
       } catch (error) {
-        this.logger.error(`Failed to upload files for user ${userId}`);
+        this.logger.error(`Failed to upload files for user ${userId}`, error.stack);
         uploadResult.error.push({ file: file.filename, error: error });
       }
+    });
+
+    // Upload images in parallel
+    await Promise.all(uploadPromises);
+
+    // Save bulk data
+    await this.convesrioRequestRepository.save(imageRequests);
+    await this.conversionTaskRepository.save(tasks);
+
+    // TODO: Optimize it to send messages in bulk
+    for (var message of messages) {
+      // make delay of 1 second
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      await this.sendMessage(message);
     }
 
     return uploadResult;
+  }
+
+  private createConversionRequest(userId: string, resolutions: string[], file: Multer.File) {
+    const conversionRequestId = uuidv4();
+    const s3Path = `users/${userId}/${conversionRequestId}/${file.originalname}`;
+    const request = {
+      id: conversionRequestId,
+      userId: userId,
+      fileName: file.originalname,
+      fileSize: file.size,
+      fileType: file.mimetype,
+      conversionRequestInfo: {
+        resolutions,
+      },
+      filePath: `${s3Path}`,
+    };
+
+    return request;
+  }
+
+  private createConversionTask(userId: string, requestId: string, resolution: string) {
+    const conversionTaskId = uuidv4();
+    return {
+      id: conversionTaskId,
+      userId: userId,
+      requestId: requestId,
+      conversionRequestInfo: {
+        resolution,
+      },
+      status: 'pending',
+    };
   }
 
   private async uploadFileToS3(path: string, file: Multer.File): Promise<string> {

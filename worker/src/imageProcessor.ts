@@ -21,7 +21,7 @@ export class ImageProcessor implements IImageProcessor {
 
     var resizedImage = "";
     try {
-      console.log("Processing image:", message.Body);
+      console.log("\n\nProcessing image:", message.Body);
       //Process the message
       resizedImage = await this.imageResizer.resizeImage(message.imageUrl);
     } catch (error) {
