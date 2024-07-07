@@ -57,7 +57,7 @@ const convictSchema = convict({
     },
     bucketName: {
       doc: 'AWS S3 bucket name',
-      env: 'AWS_BUCKET_NAME',
+      env: 'AWS_S3_BUCKET_NAME',
       default: '',
     },
     sqsUrl: {

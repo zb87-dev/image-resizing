@@ -14,6 +14,11 @@ export class ImageProcessor implements IImageProcessor {
   ) {}
 
   async processImage(message: any): Promise<boolean> {
+    if (!message) {
+      console.error("Invalid message received", message);
+      return false;
+    }
+
     var resizedImage = "";
     try {
       console.log("Processing image:", message.Body);
