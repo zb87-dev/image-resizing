@@ -31,19 +31,13 @@ describe('UploadController', () => {
   });
 
   describe('POST /images/upload', () => {
-    it('should upload files to S3', async () => {
-      const filePath = join(__dirname, 'test-files', 'test-image.jpeg');
+    it('should throw an exception when there are no provided files', async () => {
       const userId = uuidv4();
       const response = await request(app.getHttpServer())
         .post('/images/upload')
-        .field('userId', userId)
-        .attach('files', filePath)
-        .attach('files', filePath)
-        .attach('files', filePath)
-        .attach('files', filePath)
-        .attach('files', filePath);
+        .field('userId', userId);
 
-      expect(response.status).toBe(200);
+      expect(response.status).toBe(400);
     });
 
     it('should throw an exception when uploading more than 5 files', async () => {
@@ -60,6 +54,32 @@ describe('UploadController', () => {
         .attach('files', filePath);
 
       expect(response.status).toBe(400);
+    });
+
+    it('should accept 1 file', async () => {
+      const filePath = join(__dirname, 'test-files', 'test-image.jpeg');
+      const userId = uuidv4();
+      const response = await request(app.getHttpServer())
+        .post('/images/upload')
+        .field('userId', userId)
+        .attach('files', filePath);
+
+      expect(response.status).toBe(200);
+    });
+
+    it('should accept maximum 5 files', async () => {
+      const filePath = join(__dirname, 'test-files', 'test-image.jpeg');
+      const userId = uuidv4();
+      const response = await request(app.getHttpServer())
+        .post('/images/upload')
+        .field('userId', userId)
+        .attach('files', filePath)
+        .attach('files', filePath)
+        .attach('files', filePath)
+        .attach('files', filePath)
+        .attach('files', filePath);
+
+      expect(response.status).toBe(200);
     });
   });
 });

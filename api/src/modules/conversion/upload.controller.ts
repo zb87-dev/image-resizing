@@ -20,6 +20,7 @@ import { v4 as uuidv4 } from 'uuid';
 @Controller('images')
 @ApiTags('Images')
 export class UploadController {
+  private readonly MIN_FILES = 1;
   private readonly MAX_FILES = 5;
   private readonly TEMP_FOLDER = join(__dirname, '.', 'tempUploads');
 
@@ -42,10 +43,12 @@ export class UploadController {
     }),
   )
   async uploadFiles(@Body('userId') userId: string, @UploadedFiles() files: Multer.File[]) {
-    if (files.length > this.MAX_FILES) {
+    if (files.length < this.MIN_FILES || files.length > this.MAX_FILES) {
+      // Clean up temporary created files before throwing an exception
       this.deleteFiles(files);
+
       throw new BadRequestException(
-        `Too many files uploaded. Maximum ${this.MAX_FILES} files are allowed.`,
+        `Number of files uploaded must be between ${this.MIN_FILES} and ${this.MAX_FILES}.`,
       );
     }
 
