@@ -3,7 +3,7 @@ import { SQSService } from './sqs.service';
 import { AppConfigService } from '../../config/app-config.service';
 
 @Injectable()
-export class UploadService {
+export class ConversionService {
   constructor(
     private readonly appConfig: AppConfigService,
     private readonly sqsService: SQSService,

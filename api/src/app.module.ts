@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
 import { AppConfigService } from './config/app-config.service';
-import { UploadModule } from './modules/images/upload.module';
+import { ConversionModule } from './modules/conversion/conversion.module';
 
 @Module({
-  imports: [UploadModule],
+  imports: [ConversionModule],
   controllers: [],
   providers: [AppConfigService],
 })

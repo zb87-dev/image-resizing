@@ -1,11 +1,11 @@
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
-import { UploadService } from './upload.service';
+import { ConversionService } from './conversion.service';
 
 @Controller('images')
 @ApiTags('Images')
 export class UploadController {
-  constructor(private readonly uploadService: UploadService) {}
+  constructor(private readonly uploadService: ConversionService) {}
 
   @Post('upload')
   @HttpCode(HttpStatus.OK)
