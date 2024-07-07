@@ -1,6 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { HttpStatus, INestApplication, Logger } from '@nestjs/common';
+import { INestApplication, Logger } from '@nestjs/common';
 import * as request from 'supertest';
+import { join } from 'path';
+import { v4 as uuidv4 } from 'uuid';
 import { UploadController } from '../src/modules/conversion/upload.controller';
 import { ConversionService } from '../src/modules/conversion/conversion.service';
 import { AppConfigService } from '../src/config/app-config.service';
@@ -29,11 +31,35 @@ describe('UploadController', () => {
   });
 
   describe('POST /images/upload', () => {
-    it('should return 200 OK and indicate successful upload', async () => {
-      const response = await request(app.getHttpServer()).post('/images/upload').send({});
+    it('should upload files to S3', async () => {
+      const filePath = join(__dirname, 'test-files', 'test-image.jpeg');
+      const userId = uuidv4();
+      const response = await request(app.getHttpServer())
+        .post('/images/upload')
+        .field('userId', userId)
+        .attach('files', filePath)
+        .attach('files', filePath)
+        .attach('files', filePath)
+        .attach('files', filePath)
+        .attach('files', filePath);
 
-      expect(response.status).toBe(HttpStatus.OK);
-      expect(response.body).toEqual({ success: true });
+      expect(response.status).toBe(200);
+    });
+
+    it('should throw an exception when uploading more than 5 files', async () => {
+      const filePath = join(__dirname, 'test-files', 'test-image.jpeg');
+      const userId = uuidv4();
+      const response = await request(app.getHttpServer())
+        .post('/images/upload')
+        .field('userId', userId)
+        .attach('files', filePath)
+        .attach('files', filePath)
+        .attach('files', filePath)
+        .attach('files', filePath)
+        .attach('files', filePath)
+        .attach('files', filePath);
+
+      expect(response.status).toBe(400);
     });
   });
 });

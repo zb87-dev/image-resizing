@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { SQSService } from './sqs.service';
 import { AppConfigService } from '../../config/app-config.service';
 import { UserService } from '../user/user.service';
+import * as Multer from 'multer';
 
 @Injectable()
 export class ConversionService {
@@ -13,10 +14,10 @@ export class ConversionService {
     private readonly userService: UserService,
   ) {}
 
-  public async upload(): Promise<any> {
+  public async upload(userId: string, files: Multer.File[]): Promise<boolean> {
     const queueUrl = this.appConfig.getConfig().aws.sqsUrl;
     const object = { id: 'testId', message: 'Image uploaded' };
     await this.sqsService.sendMessage(queueUrl, JSON.stringify(object));
-    return { success: true };
+    return true;
   }
 }
