@@ -8,6 +8,11 @@ import { UploadService } from './upload.service';
 import { ConversionRequestRepository } from './repository/conversionRequest.repository';
 import { ConversionTaskRepository } from './repository/conversionTask.repository';
 
+interface ImageResolutionMap {
+  name: string;
+  resolutions: string[];
+}
+
 interface ConversionUpdate {
   target: 'server' | 'worker';
   userId: string;
@@ -79,7 +84,7 @@ export class ConversionService implements OnModuleInit {
 
   public async createConversion(
     userId: string,
-    resolutions: string[],
+    resolutionsMap: ImageResolutionMap[],
     files: Multer.File[],
   ): Promise<any> {
     let user = await this.userService.getUserById(userId);
@@ -99,12 +104,16 @@ export class ConversionService implements OnModuleInit {
 
     const uploadPromises = files.map(async (file) => {
       try {
-        const createRequest = this.createConversionRequest(userId, resolutions, file);
+        const selectedImageResolutions = resolutionsMap.find(
+          (r) => r.name === file.originalname,
+        ).resolutions;
+
+        const createRequest = this.createConversionRequest(userId, selectedImageResolutions, file);
         imageRequests.push(createRequest);
         await this.uploadFileToS3(createRequest.filePath, file);
         uploadResult.success.push(file.originalname);
 
-        const resolutionPromises = resolutions.map(async (resolution) => {
+        const resolutionPromises = selectedImageResolutions.map(async (resolution) => {
           const task = this.createConversionTask(userId, createRequest.id, resolution);
           tasks.push(task);
           const message = {

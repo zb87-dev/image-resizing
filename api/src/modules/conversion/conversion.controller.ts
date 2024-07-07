@@ -46,11 +46,11 @@ export class ConversionController {
   )
   async uploadFiles(
     @Body('userId') userId: string,
-    @Body('resolutions') resolutions: string | string[],
+    @Body('resolutions') resolutions: string,
     @UploadedFiles() files: Multer.File[],
   ) {
     // Ensure resolutions is an array of strings
-    const resolutionsArray = typeof resolutions === 'string' ? resolutions.split(',') : resolutions;
+    const resolutionsArray = JSON.parse(resolutions);
 
     this.validateFiles(resolutionsArray, files);
 
@@ -63,7 +63,7 @@ export class ConversionController {
     return result;
   }
 
-  private validateFiles(resolutions: string[], files: Multer.File[]): void {
+  private validateFiles(resolutions: unknown[], files: Multer.File[]): void {
     if (!files || files.length < this.MIN_FILES || files.length > this.MAX_FILES) {
       // Clean up temporary created files before throwing an exception
       this.deleteFiles(files);
