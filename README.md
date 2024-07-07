@@ -44,6 +44,9 @@ Make sure to use latest NodeJS LTS version (v20.15.0) on your machine
 In order to manage multiple NodeJS versions on your host machine, you can use tool called NVM. This solution supports it, so you can just type in the terminal
 
 > nvm install v20.15.0
+
+Then type
+
 > nvm use
 
 ## 4. Run project setup

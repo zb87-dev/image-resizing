@@ -22,4 +22,25 @@ export class SQSService {
     const result = await this.sqs.sendMessage(params).promise();
     this.logger.log(`Message sent to the queue: ${result.MessageId}`);
   }
+
+  // Add the receiveMessage method
+  public async receiveMessage(queueUrl: string): Promise<any> {
+    const params = {
+      QueueUrl: queueUrl,
+      MaxNumberOfMessages: 10,
+      WaitTimeSeconds: 20,
+    };
+
+    const result = await this.sqs.receiveMessage(params).promise();
+    return result;
+  }
+
+  public async deleteMessage(queueUrl: string, receiptHandle: string): Promise<any> {
+    return this.sqs
+      .deleteMessage({
+        QueueUrl: queueUrl,
+        ReceiptHandle: receiptHandle,
+      })
+      .promise();
+  }
 }

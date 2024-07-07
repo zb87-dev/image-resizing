@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
 import { SQSService } from './sqs.service';
 import { AppConfigService } from '../../config/app-config.service';
@@ -8,8 +8,20 @@ import { UploadService } from './upload.service';
 import { ConversionRequestRepository } from './repository/conversionRequest.repository';
 import { ConversionTaskRepository } from './repository/conversionTask.repository';
 
+interface ConversionUpdate {
+  target: 'server' | 'worker';
+  userId: string;
+  requestId: string;
+  taskId: string;
+  fileName: string;
+  resolution: string;
+  filePath: string;
+  mimeType: string;
+  convertedFilePath: string;
+}
+
 @Injectable()
-export class ConversionService {
+export class ConversionService implements OnModuleInit {
   constructor(
     private readonly appConfig: AppConfigService,
     private readonly sqsService: SQSService,
@@ -19,6 +31,50 @@ export class ConversionService {
     private readonly convesrioRequestRepository: ConversionRequestRepository,
     private readonly conversionTaskRepository: ConversionTaskRepository,
   ) {}
+
+  onModuleInit() {
+    this.startListening();
+  }
+
+  async startListening() {
+    while (true) {
+      const queueUrl = this.appConfig.getConfig().aws.sqsUrlServer;
+      const data = await this.sqsService.receiveMessage(queueUrl);
+      if (!data) {
+        continue;
+      }
+
+      for (const message of data.Messages) {
+        if (!message) {
+          continue;
+        }
+        const receiptHandle = message.ReceiptHandle;
+        const body = message.Body;
+        if (!body) {
+          continue;
+        }
+
+        try {
+          const data = JSON.parse(body);
+
+          if (data.message && data.message.target === 'server') {
+            const message: ConversionUpdate = data.message;
+
+            await this.sqsService.deleteMessage(queueUrl, receiptHandle);
+
+            const task = await this.conversionTaskRepository.getTaskById(message.taskId);
+            task.convertedFilePath = message.convertedFilePath;
+            task.status = 'finished';
+            await this.conversionTaskRepository.save(task);
+          }
+
+          // Process the message
+        } catch (error) {
+          this.logger.error('Failed to parse message body', error.stack);
+        }
+      }
+    }
+  }
 
   public async createConversion(
     userId: string,
@@ -51,6 +107,7 @@ export class ConversionService {
           const task = this.createConversionTask(userId, createRequest.id, resolution);
           tasks.push(task);
           const message = {
+            target: 'worker',
             userId: userId,
             requestId: createRequest.id,
             taskId: task.id,
@@ -80,7 +137,7 @@ export class ConversionService {
     for (var message of messages) {
       // make delay of 1 second
       await new Promise((resolve) => setTimeout(resolve, 100));
-      await this.sendMessage(message);
+      await this.sendMessageToWorker(message);
     }
 
     return uploadResult;
@@ -121,8 +178,8 @@ export class ConversionService {
     return this.uploadService.uploadFilesToS3(path, file);
   }
 
-  private async sendMessage(data: unknown): Promise<void> {
-    const queueUrl = this.appConfig.getConfig().aws.sqsUrl;
+  private async sendMessageToWorker(data: unknown): Promise<void> {
+    const queueUrl = this.appConfig.getConfig().aws.sqsUrlWorker;
     await this.sqsService.sendMessage(queueUrl, JSON.stringify(data));
   }
 }

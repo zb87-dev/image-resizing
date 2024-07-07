@@ -60,9 +60,14 @@ const convictSchema = convict({
       env: 'AWS_S3_BUCKET_NAME',
       default: '',
     },
-    sqsUrl: {
+    sqsUrlWorker: {
       doc: 'AWS SQS URL',
       env: 'AWS_SQS_URL',
+      default: '',
+    },
+    sqsUrlServer: {
+      doc: 'AWS SQS URL FAILED',
+      env: 'AWS_SQS_URL_FAILED',
       default: '',
     },
   },

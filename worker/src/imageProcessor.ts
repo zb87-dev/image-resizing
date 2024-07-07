@@ -20,12 +20,16 @@ export class ImageProcessor implements IImageProcessor {
       return false;
     }
 
-    var resizedImage = "";
     try {
       const imageData: ImageProcessingData = JSON.parse(message.Body);
 
       // Resize the image
-      resizedImage = await this.imageResizer.resizeImage(imageData);
+      const resizedImage = await this.imageResizer.resizeImage(imageData);
+
+      const messageToSend = { ...resizedImage, target: "server" };
+      await this.messageBroker.sendImageProcessingUpdate({
+        message: messageToSend,
+      });
     } catch (error) {
       await this.messageBroker.setImageProcessingFailure({
         message,
@@ -35,16 +39,6 @@ export class ImageProcessor implements IImageProcessor {
       return false;
     }
 
-    try {
-      //Upload the resized image
-      const uploadResult = await this.uploader.uploadResizedImage(resizedImage);
-      // Check upload result and return true if successful
-
-      return true;
-    } catch (error) {
-      console.error("Error processing image:", error);
-      await this.messageBroker.setImageProcessingFailure({ message, error });
-      return false;
-    }
+    return true;
   }
 }

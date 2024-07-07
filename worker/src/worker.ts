@@ -14,8 +14,14 @@ export class ImageProcessorWorker implements IWorker {
   async start() {
     while (true) {
       const message = await this.messageBroker.listenForProcessingRequests();
-      await this.imageProcessor.processImage(message);
-      await this.messageBroker.deleteMessage(message);
+      if (!message) {
+        continue;
+      }
+      const body = JSON.parse(message.Body);
+      if (body.target === "worker") {
+        await this.imageProcessor.processImage(message);
+        await this.messageBroker.deleteMessage(message);
+      }
     }
   }
 }

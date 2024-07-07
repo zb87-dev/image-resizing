@@ -4,6 +4,7 @@ export interface MessageData {
 }
 
 export interface ImageProcessingData {
+  target: "worker" | "server";
   userId: string;
   requestId: string;
   taskId: string;

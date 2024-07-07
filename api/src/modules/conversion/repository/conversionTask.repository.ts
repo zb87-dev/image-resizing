@@ -11,6 +11,10 @@ export class ConversionTaskRepository extends Repository<ConversionTask> {
     return this.createQueryBuilder('conversion_task');
   }
 
+  public async getTaskById(id: string): Promise<ConversionTask | undefined> {
+    return this.q().where('"id" = :id', { id }).getOne();
+  }
+
   public async createTask(task: ConversionTask): Promise<ConversionTask> {
     return this.save(task);
   }

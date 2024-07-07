@@ -4,7 +4,7 @@ import sharp from "sharp";
 import { PassThrough } from "stream";
 
 export interface IImageResizer {
-  resizeImage(imageData: any): Promise<string>;
+  resizeImage(imageData: any): Promise<any>;
 }
 
 export class ImageResizer implements IImageResizer {
@@ -74,7 +74,7 @@ export class ImageResizer implements IImageResizer {
       await uploadPromise;
       console.log("Resized image:", imageData, outputKey);
 
-      return Promise.resolve({ imageData, outputKey });
+      return Promise.resolve({ ...imageData, convertedFilePath: outputKey });
     } catch (error) {
       console.error("Error processing image:", error, imageData);
     }
