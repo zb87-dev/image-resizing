@@ -44,10 +44,13 @@ export class ConversionController {
       }),
     }),
   )
-  async uploadFiles(@Body('userId') userId: string, @UploadedFiles() files: Multer.File[]) {
-    this.validateFiles(files);
+  async uploadFiles(
+    @Body('userId') userId: string,
+    @Body('resolutions') resolutions: string[],
+    @UploadedFiles() files: Multer.File[],
+  ) {
+    this.validateFiles(resolutions, files);
 
-    const resolutions = ['1920x1080', '1280x720', '640x480'];
     const result = await this.uploadService.upload(userId, resolutions, files);
     if (!result) {
       throw new InternalServerErrorException(`Failed to upload files. Please try again later.`);
@@ -57,7 +60,7 @@ export class ConversionController {
     return result;
   }
 
-  private validateFiles(files: Multer.File[]): void {
+  private validateFiles(resolutions: string[], files: Multer.File[]): void {
     if (!files || files.length < this.MIN_FILES || files.length > this.MAX_FILES) {
       // Clean up temporary created files before throwing an exception
       this.deleteFiles(files);
@@ -73,6 +76,11 @@ export class ConversionController {
         throw new BadRequestException(`File type ${file.mimetype} is not supported.`);
       }
     });
+
+    if (!resolutions || resolutions.length === 0) {
+      this.deleteFiles(files);
+      throw new BadRequestException(`Resolutions must be provided.`);
+    }
   }
 
   private async deleteFiles(files: Multer.File[]): Promise<void> {

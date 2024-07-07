@@ -67,6 +67,7 @@ describe('UploadController', () => {
       const response = await request(app.getHttpServer())
         .post('/images/upload')
         .field('userId', userId)
+        .field('resolutions', ['1920x1080', '1280x720', '640x480'])
         .attach('files', getFile(ImageFiles.JPG_Example_1))
         .attach('files', getFile(ImageFiles.JPG_Example_2))
         .attach('files', getFile(ImageFiles.JPG_Example_3))
@@ -77,10 +78,20 @@ describe('UploadController', () => {
       expect(response.status).toBe(400);
     });
 
-    it.only('should accept 1 file', async () => {
+    it('should throw an exception if resolution is not provided', async () => {
       const response = await request(app.getHttpServer())
         .post('/images/upload')
         .field('userId', userId)
+        .attach('files', getFile(ImageFiles.JPG_Example_1));
+
+      expect(response.status).toBe(400);
+    });
+
+    it('should accept 1 file', async () => {
+      const response = await request(app.getHttpServer())
+        .post('/images/upload')
+        .field('userId', userId)
+        .field('resolutions', ['1920x1080', '1280x720', '640x480'])
         .attach('files', getFile(ImageFiles.JPG_Example_1));
 
       expect(response.status).toBe(201);
@@ -90,6 +101,7 @@ describe('UploadController', () => {
       const response = await request(app.getHttpServer())
         .post('/images/upload')
         .field('userId', userId)
+        .field('resolutions', ['1920x1080', '1280x720', '640x480'])
         .attach('files', getFile(ImageFiles.JPG_Example_1))
         .attach('files', getFile(ImageFiles.JPG_Example_2))
         .attach('files', getFile(ImageFiles.JPG_Example_3))
