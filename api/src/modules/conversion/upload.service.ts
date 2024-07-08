@@ -1,20 +1,26 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { S3 } from 'aws-sdk';
 import * as Multer from 'multer';
-import { v4 as uuidv4 } from 'uuid';
 import { readFile } from 'fs';
+import { AppConfigService } from '../../config/app-config.service';
+
 @Injectable()
 export class UploadService {
   private s3: S3;
   private bucketName: string;
 
-  constructor(private readonly logger: Logger) {
+  constructor(
+    private readonly logger: Logger,
+    appConfigService: AppConfigService,
+  ) {
+    const config = appConfigService.getConfig();
     this.s3 = new S3({
-      accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-      region: process.env.AWS_REGION,
+      accessKeyId: config.aws.accessKeyId,
+      secretAccessKey: config.aws.secretAccessKey,
+      region: config.aws.region,
     });
-    this.bucketName = process.env.AWS_S3_BUCKET_NAME;
+
+    this.bucketName = config.aws.bucketName;
   }
 
   async uploadFilesToS3(path: string, file: Multer.File): Promise<string> {

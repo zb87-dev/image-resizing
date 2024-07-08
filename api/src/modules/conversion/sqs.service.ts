@@ -1,15 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import { SQS } from 'aws-sdk';
+import { AppConfigService } from '../../config/app-config.service';
 
 @Injectable()
 export class SQSService {
   private sqs: SQS;
 
-  constructor() {
+  constructor(appConfigService: AppConfigService) {
+    const config = appConfigService.getConfig();
     this.sqs = new SQS({
-      region: process.env.AWS_REGION,
-      accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+      region: config.aws.region,
+      accessKeyId: config.aws.accessKeyId,
+      secretAccessKey: config.aws.secretAccessKey,
     });
   }
 
