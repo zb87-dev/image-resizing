@@ -38,15 +38,27 @@ code {
 	border-bottom: 1px solid #ddd;
   }
 
-  .convert-button {
+  button {
 	padding: 8px 16px;
-	background-color: #007bff;
+	background-color: #f48c31;
 	color: #fff;
 	border: none;
 	border-radius: 4px;
 	cursor: pointer;
   }
 
-  .convert-button:hover {
-	background-color: #0056b3;
+  button:hover {
+	background-color: #f5770a;
+  }
+
+  button:disabled {
+	background-color: #d2d2d2;
+  }
+
+  .convert-button {
+	margin-left: 10px;
+  }
+
+  .convert-button:disabled {
+	background-color: #d2d2d2;
   }

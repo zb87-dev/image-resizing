@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { v4 as uuidv4 } from "uuid";
 import ConversionStatus from "./ConversionStatus";
 import {
   createConversionRequest,
@@ -8,12 +9,19 @@ import {
 import { ConversationRequestDetails } from "./Interfaces";
 
 const ImageUpload: React.FC = () => {
+  const refreshInteval = 1000;
+  const [submitting, setSubmitting] = useState<boolean>(false);
+
   const [images, setImages] = useState<File[]>([]);
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const newImages = Array.from(e.target.files).map((file) => file);
       setImages((prevImages) => [...prevImages, ...newImages]);
     }
+  };
+
+  const clearImagesAfterUpload = () => {
+    setImages([]);
   };
 
   const [conversionRequests, setConversionRequests] = useState<
@@ -23,7 +31,6 @@ const ImageUpload: React.FC = () => {
   const refreshData = async () => {
     const userId = getUserId();
     const data = await getConversionRequests(userId);
-    // console.log(data);
     setConversionRequests(data);
   };
 
@@ -31,7 +38,7 @@ const ImageUpload: React.FC = () => {
     refreshData();
 
     // Set up interval to fetch data every second
-    const intervalId = setInterval(refreshData, 5000);
+    const intervalId = setInterval(refreshData, refreshInteval);
 
     // Clear interval on component unmount
     return () => clearInterval(intervalId);
@@ -40,7 +47,7 @@ const ImageUpload: React.FC = () => {
   const getUserId = (): string => {
     let userId = localStorage.getItem("userId");
     if (!userId) {
-      const newUserId = "0444910d-400c-4535-8b27-0c839e549cfb";
+      const newUserId = uuidv4();
       localStorage.setItem("userId", newUserId);
       userId = newUserId;
     }
@@ -49,6 +56,7 @@ const ImageUpload: React.FC = () => {
   };
 
   const handleSubmit = async () => {
+    setSubmitting(true);
     const formData = new FormData();
     images.forEach((file) => {
       formData.append("files", file);
@@ -56,6 +64,10 @@ const ImageUpload: React.FC = () => {
     formData.set("userId", getUserId());
 
     await createConversionRequest(formData);
+
+    // Clear images after upload
+    clearImagesAfterUpload();
+    setSubmitting(false);
   };
 
   const handleConvert = async (requestId: string, resolutions: string[]) => {
@@ -65,14 +77,17 @@ const ImageUpload: React.FC = () => {
   return (
     <div>
       <div className="container">
-        <div className="task-group-card">
+        <div className="task-group-card ">
           <input
+            className="download-button"
             type="file"
             accept="image/png, image/jpeg"
             multiple
             onChange={handleImageChange}
           />
-          <button onClick={handleSubmit}>Upload</button>
+          <button disabled={submitting} onClick={handleSubmit}>
+            Upload
+          </button>
         </div>
       </div>
       <ConversionStatus

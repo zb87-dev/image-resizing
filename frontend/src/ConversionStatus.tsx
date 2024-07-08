@@ -18,6 +18,8 @@ const ConversionStatus: React.FC<ConversionStatusProps> = (
   const [selectedResolutions, setSelectedResolutions] = useState<
     RequestResolutionMap[]
   >([]);
+  const [conversionInProgress, setConversionInProgress] =
+    useState<boolean>(false);
 
   const handleResolutionChange = (
     request: ConversationRequestDetails,
@@ -53,6 +55,7 @@ const ConversionStatus: React.FC<ConversionStatusProps> = (
   };
 
   const handleConvert = async (request: ConversationRequestDetails) => {
+    setConversionInProgress(true);
     const conversionResolutions = selectedResolutions.find(
       (x) => x.requestId === request.id
     );
@@ -61,11 +64,12 @@ const ConversionStatus: React.FC<ConversionStatusProps> = (
       return;
     }
 
-    props.handleConvert(request.id, conversionResolutions.resolutions);
+    await props.handleConvert(request.id, conversionResolutions.resolutions);
+    setConversionInProgress(false);
   };
 
   const isDisabled = (request: ConversationRequestDetails) => {
-    if (request.status !== "pending") {
+    if (request.status !== "pending" || conversionInProgress) {
       return true;
     }
 
@@ -78,7 +82,8 @@ const ConversionStatus: React.FC<ConversionStatusProps> = (
         <div key={taskGroup.id} className="task-group-card">
           <h2>{taskGroup.fileName}</h2>
           <p>
-            <strong>Created at:</strong> {taskGroup.createdAt.toLocaleString()}
+            <strong>Created at:</strong>{" "}
+            {new Date(taskGroup.createdAt).toLocaleString()}
           </p>
           <p>
             <strong>Status:</strong> {taskGroup.status}
@@ -96,6 +101,7 @@ const ConversionStatus: React.FC<ConversionStatusProps> = (
               </label>
             ))}
             <button
+              className="convert-button"
               disabled={isDisabled(taskGroup)}
               onClick={() => handleConvert(taskGroup)}
             >
@@ -116,6 +122,14 @@ const ConversionStatus: React.FC<ConversionStatusProps> = (
                       <strong>Status:</strong> {task.taskStatus}
                     </p>
                     <p>
+                      <strong>Created At:</strong>{" "}
+                      {new Date(task.taskCreatedAt).toLocaleString()}
+                    </p>
+                    <p>
+                      <strong>Updated At:</strong>{" "}
+                      {new Date(task.taskUpdatedAt).toLocaleString()}
+                    </p>
+                    <p>
                       <strong>Converted File:</strong>{" "}
                       <a
                         href={task.convertedFilePath}
@@ -125,14 +139,6 @@ const ConversionStatus: React.FC<ConversionStatusProps> = (
                       >
                         Download
                       </a>
-                    </p>
-                    <p>
-                      <strong>Created At:</strong>{" "}
-                      {new Date(task.taskCreatedAt).toLocaleString()}
-                    </p>
-                    <p>
-                      <strong>Updated At:</strong>{" "}
-                      {new Date(task.taskUpdatedAt).toLocaleString()}
                     </p>
                   </li>
                 ))}

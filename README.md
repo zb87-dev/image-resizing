@@ -69,6 +69,10 @@ In the separate terminal(s), start the worker(s) using the following command
 
 > npm run worker
 
+## 7. Run the frontend
+
+Navigate to the frontend folder, copy sample.env into .env and setup api url. Default one is http://localhost:3000
+
 ## Running e2e tests
 
 In order to run e2e tests, open **api** folder and create test.env with appropriate values. Then you can run
