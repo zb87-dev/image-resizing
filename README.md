@@ -94,3 +94,5 @@ At the moment, updating UI is done via polling every 250ms. In order to make UI 
 If you want to increase polling time, Open ConversionRequest.tsx and change **refreshInteval**.
 
 When sending SQS message from worker to the api, i used already created **-failed** SQS queue, instead of the other one, since i didn't have permissions to create new queue for that purpose.
+
+If you want to clear all your uploads (simulate new user), just clear localStorage.
