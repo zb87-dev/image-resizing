@@ -66,3 +66,9 @@ code {
   .error {
     color: red
   }
+
+  .info-message {
+    text-decoration: underline;
+    font-style: italic;
+    padding-left: 10px;
+  }

@@ -104,11 +104,18 @@ const ConversionsList: React.FC<ConversionStatusProps> = (
               ))}
               <button
                 className="convert-button"
-                disabled={isDisabled(taskGroup)}
+                disabled={
+                  isDisabled(taskGroup) ||
+                  !selectedResolutions.find((x) => x.requestId === taskGroup.id)
+                    ?.resolutions.length
+                }
                 onClick={() => handleConvert(taskGroup)}
               >
                 Convert
               </button>
+              <span className="info-message">
+                Please pick resolution(s) before starting conversion
+              </span>
             </p>
           )}
 
