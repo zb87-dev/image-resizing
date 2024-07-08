@@ -1,6 +1,8 @@
-export interface MessageData {
-  ReceiptHandle?: string;
-  Body?: string;
+export enum ConversionStatus {
+  PENDING = "pending",
+  IN_PROGRESS = "in-progress",
+  COMPLETED = "completed",
+  FAILED = "failed",
 }
 
 export interface ImageProcessingData {
@@ -12,4 +14,9 @@ export interface ImageProcessingData {
   resolution: string;
   filePath: string;
   mimeType: string;
+}
+
+export enum Target {
+  SERVER = "server",
+  WORKER = "worker",
 }

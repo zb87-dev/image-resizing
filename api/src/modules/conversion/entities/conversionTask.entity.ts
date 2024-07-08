@@ -1,4 +1,5 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { ConversionStatus } from '../interfaces';
 
 @Entity('conversion_task')
 export class ConversionTask {
@@ -22,7 +23,7 @@ export class ConversionTask {
   public convertedFilePath?: string;
 
   @Column({ type: 'text' })
-  public status = 'pending' || 'completed' || 'failed';
+  public status: ConversionStatus;
 
   @Column({ type: 'timestamptz' })
   public createdAt?: Date;

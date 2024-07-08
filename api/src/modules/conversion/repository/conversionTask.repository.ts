@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource, Repository, SelectQueryBuilder } from 'typeorm';
 import { ConversionTask } from '../entities/conversionTask.entity';
+import { ConversionStatus } from '../interfaces';
 
 @Injectable()
 export class ConversionTaskRepository extends Repository<ConversionTask> {
@@ -19,7 +20,7 @@ export class ConversionTaskRepository extends Repository<ConversionTask> {
     return this.save(task);
   }
 
-  public async getTasksByStatusOlderThan(olderThan: Date, status: string) {
+  public async getTasksByStatusOlderThan(olderThan: Date, status: ConversionStatus) {
     return this.manager.query(
       `
       select
@@ -36,5 +37,9 @@ export class ConversionTaskRepository extends Repository<ConversionTask> {
       `,
       [olderThan, status],
     );
+  }
+
+  public async getTasksByRequestId(requestId: string): Promise<ConversionTask[]> {
+    return this.q().where('"requestId" = :requestId', { requestId }).getMany();
   }
 }

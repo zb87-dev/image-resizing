@@ -1,5 +1,5 @@
 import { IImageResizer } from "./imageResizer";
-import { ImageProcessingData } from "./interfaces";
+import { ConversionStatus, ImageProcessingData, Target } from "./interfaces";
 import { IMessageBroker } from "./messageBroker";
 import { IUploader } from "./uploader";
 
@@ -28,8 +28,8 @@ export class ImageProcessor implements IImageProcessor {
 
       const messageToSend = {
         ...resizedImage,
-        target: "server",
-        status: "finished",
+        target: Target.SERVER,
+        status: ConversionStatus.COMPLETED,
       };
       await this.messageBroker.sendImageProcessingUpdate({
         message: messageToSend,

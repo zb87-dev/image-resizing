@@ -1,4 +1,5 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { ConversionStatus } from '../interfaces';
 
 @Entity('conversion_request')
 export class ConversionRequest {
@@ -25,7 +26,7 @@ export class ConversionRequest {
   public filePath: string;
 
   @Column({ type: 'text' })
-  public status = 'pending' || 'completed' || 'failed';
+  public status: ConversionStatus;
 
   @Column({ type: 'text' })
   public resolutions: string;

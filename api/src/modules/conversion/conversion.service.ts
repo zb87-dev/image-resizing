@@ -18,19 +18,7 @@ import {
 } from './repository/conversionRequest.repository';
 import { ConversionTaskRepository } from './repository/conversionTask.repository';
 import { ConversionRequest } from './entities/conversionRequest.entity';
-
-interface ConversionUpdate {
-  target: 'server' | 'worker';
-  userId: string;
-  requestId: string;
-  taskId: string;
-  fileName: string;
-  resolution: string;
-  filePath: string;
-  mimeType: string;
-  convertedFilePath: string;
-  status: string;
-}
+import { ConversionStatus, ConversionUpdate, Target } from './interfaces';
 
 @Injectable()
 export class ConversionService implements OnModuleInit {
@@ -120,7 +108,7 @@ export class ConversionService implements OnModuleInit {
     }
 
     // Set it's status to processing
-    conversion.status = 'processing';
+    conversion.status = ConversionStatus.IN_PROGRESS;
     conversion.resolutions = JSON.stringify(resolutions);
     await this.conversionRequestRepository.save(conversion);
 
@@ -151,7 +139,7 @@ export class ConversionService implements OnModuleInit {
   public async processPendingTasks() {
     // create const older than 1 minute from now
     const olderThan = new Date(Date.now() - 60 * 1000);
-    const status = 'pending';
+    const status = ConversionStatus.PENDING;
     const pendingTasks = await this.conversionTaskRepository.getTasksByStatusOlderThan(
       olderThan,
       status,
@@ -249,6 +237,23 @@ export class ConversionService implements OnModuleInit {
     return this.uploadService.generatePresignedUrl(bucketName, key, 60);
   }
 
+  private async updateRequestStatus(userId: string, requestId: string) {
+    const request = await this.conversionRequestRepository.getUserRequestById(userId, requestId);
+    const numberOfDesiredConversions = (JSON.parse(request.resolutions) as string[]).length;
+    const requestTasks = await this.conversionTaskRepository.getTasksByRequestId(requestId);
+
+    const numberOfCompletedTasks = requestTasks.filter(
+      (task) => task.status === ConversionStatus.COMPLETED,
+    ).length;
+
+    if (numberOfCompletedTasks === numberOfDesiredConversions) {
+      request.status = ConversionStatus.COMPLETED;
+    } else {
+      request.status = ConversionStatus.IN_PROGRESS;
+    }
+    await this.conversionRequestRepository.save(request);
+  }
+
   private async startListeningForMessages() {
     while (true) {
       const queueUrl = this.appConfig.getConfig().aws.sqsUrlServer;
@@ -270,7 +275,7 @@ export class ConversionService implements OnModuleInit {
         try {
           const data = JSON.parse(body);
 
-          if (data.message && data.message.target === 'server') {
+          if (data.message && data.message.target === Target.SERVER) {
             const message: ConversionUpdate = data.message;
 
             await this.sqsService.deleteMessage(queueUrl, receiptHandle);
@@ -279,8 +284,8 @@ export class ConversionService implements OnModuleInit {
             task.convertedFilePath = message.convertedFilePath;
             task.status = message.status;
             await this.conversionTaskRepository.save(task);
+            await this.updateRequestStatus(message.userId, message.requestId);
           }
-
           // Process the message
         } catch (error) {
           this.logger.error('Failed to parse message body', error.stack);
@@ -299,7 +304,7 @@ export class ConversionService implements OnModuleInit {
       fileSize: file.size,
       fileType: file.mimetype,
       filePath: `${s3Path}`,
-      status: 'pending',
+      status: ConversionStatus.PENDING,
       resolutions: '[]',
     };
 
@@ -313,7 +318,7 @@ export class ConversionService implements OnModuleInit {
       userId: userId,
       requestId: requestId,
       resolution,
-      status: 'pending',
+      status: ConversionStatus.PENDING,
     };
   }
 
