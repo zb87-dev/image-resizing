@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
-import ConversionStatus from "./ConversionStatus";
+import ConversionsList from "./ConversionsList";
 import {
   createConversionRequest,
   getConversionRequests,
@@ -8,15 +8,15 @@ import {
 } from "./api";
 import { ConversationRequestDetails } from "./Interfaces";
 
-const ImageUpload: React.FC = () => {
-  const refreshInteval = 1000;
+const ConversionRequest: React.FC = () => {
+  const refreshInteval = 500;
   const [submitting, setSubmitting] = useState<boolean>(false);
 
   const [images, setImages] = useState<File[]>([]);
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const newImages = Array.from(e.target.files).map((file) => file);
-      setImages((prevImages) => [...prevImages, ...newImages]);
+      setImages(newImages);
     }
   };
 
@@ -96,7 +96,7 @@ const ImageUpload: React.FC = () => {
           </button>
         </div>
       </div>
-      <ConversionStatus
+      <ConversionsList
         requests={conversionRequests}
         handleConvert={handleConvert}
       />
@@ -104,4 +104,4 @@ const ImageUpload: React.FC = () => {
   );
 };
 
-export default ImageUpload;
+export default ConversionRequest;

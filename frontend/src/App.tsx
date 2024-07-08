@@ -1,10 +1,10 @@
 import React from "react";
-import ImageUpload from "./ImageUpload";
+import ConversionRequest from "./ConversionRequest";
 
 function App() {
   return (
     <div>
-      <ImageUpload />
+      <ConversionRequest />
     </div>
   );
 }

@@ -11,15 +11,13 @@ type RequestResolutionMap = {
   resolutions: string[];
 };
 
-const ConversionStatus: React.FC<ConversionStatusProps> = (
+const ConversionsList: React.FC<ConversionStatusProps> = (
   props: ConversionStatusProps
 ) => {
   const resolutionsOptions = ["640x480", "1280x720", "1920x1080"];
   const [selectedResolutions, setSelectedResolutions] = useState<
     RequestResolutionMap[]
   >([]);
-  const [conversionInProgress, setConversionInProgress] =
-    useState<boolean>(false);
 
   const handleResolutionChange = (
     request: ConversationRequestDetails,
@@ -55,7 +53,7 @@ const ConversionStatus: React.FC<ConversionStatusProps> = (
   };
 
   const handleConvert = async (request: ConversationRequestDetails) => {
-    setConversionInProgress(true);
+    // request.status = "in-progress";
     const conversionResolutions = selectedResolutions.find(
       (x) => x.requestId === request.id
     );
@@ -65,15 +63,18 @@ const ConversionStatus: React.FC<ConversionStatusProps> = (
     }
 
     await props.handleConvert(request.id, conversionResolutions.resolutions);
-    setConversionInProgress(false);
   };
 
   const isDisabled = (request: ConversationRequestDetails) => {
-    if (request.status !== "pending" || conversionInProgress) {
+    if (request.status !== "pending") {
       return true;
     }
 
     return false;
+  };
+
+  const isConversionPending = (request: ConversationRequestDetails) => {
+    return request.status === "pending";
   };
 
   return (
@@ -88,26 +89,28 @@ const ConversionStatus: React.FC<ConversionStatusProps> = (
           <p>
             <strong>Status:</strong> {taskGroup.status}
           </p>
-          <p>
-            {resolutionsOptions.map((resolution) => (
-              <label key={resolution}>
-                <input
-                  disabled={isDisabled(taskGroup)}
-                  type="checkbox"
-                  value={resolution}
-                  onChange={(val) => handleResolutionChange(taskGroup, val)}
-                />
-                {resolution}
-              </label>
-            ))}
-            <button
-              className="convert-button"
-              disabled={isDisabled(taskGroup)}
-              onClick={() => handleConvert(taskGroup)}
-            >
-              Convert
-            </button>
-          </p>
+          {isConversionPending(taskGroup) && (
+            <p>
+              {resolutionsOptions.map((resolution) => (
+                <label key={resolution}>
+                  <input
+                    disabled={isDisabled(taskGroup)}
+                    type="checkbox"
+                    value={resolution}
+                    onChange={(val) => handleResolutionChange(taskGroup, val)}
+                  />
+                  {resolution}
+                </label>
+              ))}
+              <button
+                className="convert-button"
+                disabled={isDisabled(taskGroup)}
+                onClick={() => handleConvert(taskGroup)}
+              >
+                Convert
+              </button>
+            </p>
+          )}
 
           {taskGroup.tasks.length > 0 && (
             <div>
@@ -117,17 +120,6 @@ const ConversionStatus: React.FC<ConversionStatusProps> = (
                   <li key={task.taskId} className="task-item">
                     <p>
                       <strong>Resolution:</strong> {task.resolution}
-                    </p>
-                    <p>
-                      <strong>Status:</strong> {task.taskStatus}
-                    </p>
-                    <p>
-                      <strong>Created At:</strong>{" "}
-                      {new Date(task.taskCreatedAt).toLocaleString()}
-                    </p>
-                    <p>
-                      <strong>Updated At:</strong>{" "}
-                      {new Date(task.taskUpdatedAt).toLocaleString()}
                     </p>
                     <p>
                       <strong>Converted File:</strong>{" "}
@@ -151,4 +143,4 @@ const ConversionStatus: React.FC<ConversionStatusProps> = (
   );
 };
 
-export default ConversionStatus;
+export default ConversionsList;
