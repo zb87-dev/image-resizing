@@ -1,6 +1,6 @@
 # image-resizing
 
-Solution for image resizing using Amazon SQS
+Solution for image resizing using Amazon SQS and separate workers used for image conversion.
 
 # In order to run the project, run the following steps:
 
@@ -35,7 +35,7 @@ IS_TEMPLATE = False;
 ## 2. Environment setup
 
 Open **api** folder and copy sample.env into .env file and adjust values accordingly.
-Do the same for the **worker** project.
+Do the same for the **worker** and **frontend** projects.
 
 ## 3. NodeJS version
 
@@ -55,7 +55,7 @@ Inside the terminal, navigate to the root folder of the project and then type in
 
 > npm run setup
 
-This command will install api and run database setup.
+This command will install dependencies for all projects.
 
 ## 5. Run the server
 
@@ -71,7 +71,7 @@ In the separate terminal(s), start the worker(s) using the following command
 
 ## 7. Run the frontend
 
-Navigate to the frontend folder, copy sample.env into .env and setup api url. Default one is http://localhost:3000
+> npm run frontend
 
 ## Running e2e tests
 

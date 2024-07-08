@@ -4,7 +4,9 @@
   "description": "Image resizing solution",
   "scripts": {
     "setup:api": "cd api && npm install && npm run migration:run",
-    "setup": "npm run setup:api",
+    "setup:worker": "cd worker && npm install",
+    "setup:frontend": "cd frontend && npm install",
+    "setup": "npm run setup:api && npm run setup:worker && npm run setup:frontend",
     "server": "cd api && npm run start",
     "worker": "cd worker && npm run start",
     "frontend": "cd frontend && npm run start"
