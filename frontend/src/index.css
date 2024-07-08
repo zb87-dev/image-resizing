@@ -62,3 +62,7 @@ code {
   .convert-button:disabled {
 	background-color: #d2d2d2;
   }
+
+  .error {
+    color: red
+  }

@@ -10,11 +10,20 @@ import { ConversationRequestDetails } from "./Interfaces";
 
 const ConversionRequest: React.FC = () => {
   const refreshInteval = 500;
+  const maxFiles = 5;
   const [submitting, setSubmitting] = useState<boolean>(false);
 
   const [images, setImages] = useState<File[]>([]);
+  const [error, setError] = useState<string | null>(null);
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
+      if (e.target.files.length > maxFiles) {
+        setError(`You can upload maximum ${maxFiles} files`);
+        return;
+      } else {
+        setError(null);
+      }
+
       const newImages = Array.from(e.target.files).map((file) => file);
       setImages(newImages);
     }
@@ -85,7 +94,6 @@ const ConversionRequest: React.FC = () => {
         <div className="task-group-card">
           <input
             ref={inputRef}
-            className="download-button"
             type="file"
             accept="image/png, image/jpeg"
             multiple
@@ -94,6 +102,7 @@ const ConversionRequest: React.FC = () => {
           <button disabled={isUploadDisabled} onClick={handleSubmit}>
             Upload
           </button>
+          {error && <div className="error">{error}</div>}
         </div>
       </div>
       <ConversionsList
