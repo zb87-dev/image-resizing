@@ -22,6 +22,23 @@ export class SQSService {
     await this.sqs.sendMessage(params).promise();
   }
 
+  public async sendBulkMessages(
+    queueUrl: string,
+    messages: { id: string; messageBody: string }[],
+  ): Promise<void> {
+    const entries = messages.map((message) => ({
+      Id: message.id,
+      MessageBody: message.messageBody,
+    }));
+
+    await this.sqs
+      .sendMessageBatch({
+        Entries: entries,
+        QueueUrl: queueUrl,
+      })
+      .promise();
+  }
+
   // Add the receiveMessage method
   public async receiveMessage(queueUrl: string): Promise<any> {
     const params = {

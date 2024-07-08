@@ -187,6 +187,9 @@ export class ConversionService implements OnModuleInit {
       await new Promise((resolve) => setTimeout(resolve, 100));
       await this.sendMessageToWorker(message);
     }
+
+    // TODO: Check why is not working as it should, needs more investigation
+    // await this.sendBulkMessageToWorker(messages);
   }
 
   private groupRequestsAndTasks(data: ConversionRequestWithStatus[]) {
@@ -330,6 +333,16 @@ export class ConversionService implements OnModuleInit {
   private async sendMessageToWorker(data: unknown): Promise<void> {
     const queueUrl = this.appConfig.getConfig().aws.sqsUrlWorker;
     await this.sqsService.sendMessage(queueUrl, JSON.stringify(data));
+  }
+
+  private async sendBulkMessageToWorker(data: ConversionUpdate[]): Promise<void> {
+    const queueUrl = this.appConfig.getConfig().aws.sqsUrlWorker;
+
+    const messages = data.map((message: ConversionUpdate) => ({
+      id: message.taskId,
+      messageBody: JSON.stringify(message),
+    }));
+    await this.sqsService.sendBulkMessages(queueUrl, messages);
   }
 
   private validateFiles(files: Multer.File[]): BadRequestException {
