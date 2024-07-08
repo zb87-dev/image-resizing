@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ConversationRequestDetails } from "./Interfaces";
+import { ConversationRequestDetails, ConversionStatus } from "./Interfaces";
 
 type ConversionStatusProps = {
   requests: ConversationRequestDetails[];
@@ -53,7 +53,6 @@ const ConversionsList: React.FC<ConversionStatusProps> = (
   };
 
   const handleConvert = async (request: ConversationRequestDetails) => {
-    // request.status = "in-progress";
     const conversionResolutions = selectedResolutions.find(
       (x) => x.requestId === request.id
     );
@@ -66,7 +65,7 @@ const ConversionsList: React.FC<ConversionStatusProps> = (
   };
 
   const isDisabled = (request: ConversationRequestDetails) => {
-    if (request.status !== "pending") {
+    if (request.status !== ConversionStatus.PENDING) {
       return true;
     }
 
@@ -74,7 +73,7 @@ const ConversionsList: React.FC<ConversionStatusProps> = (
   };
 
   const isConversionPending = (request: ConversationRequestDetails) => {
-    return request.status === "pending";
+    return request.status === ConversionStatus.PENDING;
   };
 
   return (

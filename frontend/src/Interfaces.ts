@@ -2,7 +2,7 @@ export interface Task {
   taskRequestId: string;
   taskId: string;
   resolution: string;
-  taskStatus: string;
+  taskStatus: ConversionStatus;
   convertedFilePath: string;
   taskCreatedAt: string;
   taskUpdatedAt: string;
@@ -18,7 +18,14 @@ export interface ConversationRequestDetails {
   fileSize: number;
   fileType: string;
   resolutions: string;
-  status: string;
+  status: ConversionStatus;
   createdAt: Date;
   tasks: Task[];
+}
+
+export enum ConversionStatus {
+  PENDING = "pending",
+  IN_PROGRESS = "in-progress",
+  COMPLETED = "completed",
+  FAILED = "failed",
 }
