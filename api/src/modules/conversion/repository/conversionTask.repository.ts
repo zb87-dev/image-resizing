@@ -18,4 +18,23 @@ export class ConversionTaskRepository extends Repository<ConversionTask> {
   public async createTask(task: ConversionTask): Promise<ConversionTask> {
     return this.save(task);
   }
+
+  public async getTasksByStatusOlderThan(olderThan: Date, status: string) {
+    return this.manager.query(
+      `
+      select
+      ct."userId",
+      ct."requestId",
+      ct."id" as "taskId",
+      ct."resolution",
+      cr."fileName",
+      cr."filePath",
+      cr."fileType"
+      from conversion_task ct
+      inner join conversion_request cr on ct."requestId" = cr."id"
+      where ct."status" = $2 and ct."createdAt" <= $1
+      `,
+      [olderThan, status],
+    );
+  }
 }

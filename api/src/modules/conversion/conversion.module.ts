@@ -7,9 +7,11 @@ import { UserModule } from '../user/user.module';
 import { UploadService } from './upload.service';
 import { ConversionRequestRepository } from './repository/conversionRequest.repository';
 import { ConversionTaskRepository } from './repository/conversionTask.repository';
+import { ScheduleModule } from '@nestjs/schedule';
+import { CronService } from './cron.service';
 
 @Module({
-  imports: [UserModule],
+  imports: [UserModule, ScheduleModule.forRoot()],
   controllers: [ConversionController],
   providers: [
     AppConfigService,
@@ -19,6 +21,7 @@ import { ConversionTaskRepository } from './repository/conversionTask.repository
     ConversionRequestRepository,
     ConversionTaskRepository,
     Logger,
+    CronService,
   ],
   exports: [ConversionRequestRepository, ConversionTaskRepository],
 })

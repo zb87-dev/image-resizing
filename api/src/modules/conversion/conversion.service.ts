@@ -56,6 +56,7 @@ export class ConversionService implements OnModuleInit {
     userId: string,
     files: Multer.File[],
   ): Promise<{ error?: Error; response?: any }> {
+    // Validate files, return error if any
     const error = this.validateFiles(files);
     if (error) {
       return { error };
@@ -68,10 +69,9 @@ export class ConversionService implements OnModuleInit {
       };
 
       const conversionRequests = [];
-
       const user = await this.userService.getUserById(userId);
 
-      // Upload images in parallel
+      // Create promise for each upload so that we can run them in parallel
       const uploadPromises = files.map(async (file) => {
         try {
           const conversionRequest = this.createConversionRequest(user.id, file);
@@ -131,7 +131,55 @@ export class ConversionService implements OnModuleInit {
     });
 
     await this.conversionTaskRepository.save(tasks);
+    await this.sendMessagesToWorker(messages);
 
+    return conversion;
+  }
+
+  public async processPendingTasks() {
+    // create const older than 1 minute from now
+    const olderThan = new Date(Date.now() - 60 * 1000);
+    const status = 'pending';
+    const pendingTasks = await this.conversionTaskRepository.getTasksByStatusOlderThan(
+      olderThan,
+      status,
+    );
+
+    if (pendingTasks.length === 0) {
+      return;
+    }
+
+    this.logger.debug(
+      `Found ${pendingTasks.length} pending tasks, will resend messages to the SQS.`,
+    );
+
+    const messages = [];
+    for (const task of pendingTasks) {
+      const message = {
+        target: 'worker',
+        userId: task.userId,
+        requestId: task.requestId,
+        taskId: task.taskId,
+        fileName: task.fileName,
+        resolution: task.resolution,
+        filePath: task.filePath,
+        fileType: task.fileType,
+      };
+
+      messages.push(message);
+    }
+
+    await this.sendMessagesToWorker(messages);
+  }
+
+  public async getConversionRequests(userId: string) {
+    const data =
+      await this.conversionRequestRepository.getConversionRequestsDetailsByUserId(userId);
+
+    return this.groupRequestsAndTasks(data);
+  }
+
+  private async sendMessagesToWorker(messages: ConversionUpdate[]) {
     // Inform worker using SQS to start conversion
     // TODO: Optimize it to send messages in bulk
     for (var message of messages) {
@@ -139,8 +187,6 @@ export class ConversionService implements OnModuleInit {
       await new Promise((resolve) => setTimeout(resolve, 100));
       await this.sendMessageToWorker(message);
     }
-
-    return conversion;
   }
 
   private groupRequestsAndTasks(data: ConversionRequestWithStatus[]) {
@@ -180,13 +226,6 @@ export class ConversionService implements OnModuleInit {
     }, []);
 
     return groupedTasks;
-  }
-
-  public async getConversionRequests(userId: string) {
-    const data =
-      await this.conversionRequestRepository.getConversionRequestsDetailsByUserId(userId);
-
-    return this.groupRequestsAndTasks(data);
   }
 
   private getPublicUrl(key: string) {
