@@ -21,7 +21,7 @@ const convictSchema = convict({
     port: {
       doc: 'Port of the database',
       env: 'DB_PORT',
-      default: '',
+      default: 5432,
     },
     username: {
       doc: 'Username of the database',
