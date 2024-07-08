@@ -1,11 +1,11 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { SQS } from 'aws-sdk';
 
 @Injectable()
 export class SQSService {
   private sqs: SQS;
 
-  constructor(private readonly logger: Logger) {
+  constructor() {
     this.sqs = new SQS({
       region: process.env.AWS_REGION,
       accessKeyId: process.env.AWS_ACCESS_KEY_ID,
@@ -19,8 +19,7 @@ export class SQSService {
       MessageBody: messageBody,
     };
 
-    const result = await this.sqs.sendMessage(params).promise();
-    this.logger.log(`Message sent to the queue: ${result.MessageId}`);
+    await this.sqs.sendMessage(params).promise();
   }
 
   // Add the receiveMessage method

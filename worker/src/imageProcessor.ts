@@ -1,7 +1,6 @@
 import { IImageResizer } from "./imageResizer";
 import { ConversionStatus, ImageProcessingData, Target } from "./interfaces";
 import { IMessageBroker } from "./messageBroker";
-import { IUploader } from "./uploader";
 
 export interface IImageProcessor {
   processImage(imageDetails: any): Promise<boolean>;
@@ -10,8 +9,7 @@ export interface IImageProcessor {
 export class ImageProcessor implements IImageProcessor {
   constructor(
     private readonly messageBroker: IMessageBroker,
-    private readonly imageResizer: IImageResizer,
-    private readonly uploader: IUploader
+    private readonly imageResizer: IImageResizer
   ) {}
 
   async processImage(message: any): Promise<boolean> {
@@ -31,6 +29,7 @@ export class ImageProcessor implements IImageProcessor {
         target: Target.SERVER,
         status: ConversionStatus.COMPLETED,
       };
+
       await this.messageBroker.sendImageProcessingUpdate({
         message: messageToSend,
       });

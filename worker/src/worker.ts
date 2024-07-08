@@ -1,4 +1,5 @@
 import { IImageProcessor } from "./imageProcessor";
+import { Target } from "./interfaces";
 import { IMessageBroker } from "./messageBroker";
 
 export interface IWorker {
@@ -17,11 +18,14 @@ export class ImageProcessorWorker implements IWorker {
       if (!message) {
         continue;
       }
+
       const body = JSON.parse(message.Body);
-      if (body.target === "worker") {
-        await this.imageProcessor.processImage(message);
-        await this.messageBroker.deleteMessage(message);
+      if (body.target !== Target.WORKER) {
+        continue;
       }
+
+      await this.imageProcessor.processImage(message);
+      await this.messageBroker.deleteMessage(message);
     }
   }
 }

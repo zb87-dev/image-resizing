@@ -1,7 +1,6 @@
 import { IImageProcessor, ImageProcessor } from "./imageProcessor";
 import { IImageResizer, ImageResizer } from "./imageResizer";
 import { IMessageBroker, SQSMessageBroker } from "./messageBroker";
-import { IUploader, S3Uploader } from "./uploader";
 import { ImageProcessorWorker, IWorker } from "./worker";
 
 export class Factory {
@@ -11,9 +10,7 @@ export class Factory {
 
     return new ImageProcessorWorker(messageBroker, imageProcessor);
   }
-  static createImageUploader(): IUploader {
-    return new S3Uploader();
-  }
+
   static createImageResizer(): IImageResizer {
     return new ImageResizer();
   }
@@ -25,8 +22,7 @@ export class Factory {
   static createImageProcessor(): IImageProcessor {
     return new ImageProcessor(
       Factory.createMessageBroker(),
-      Factory.createImageResizer(),
-      Factory.createImageUploader()
+      Factory.createImageResizer()
     );
   }
 }

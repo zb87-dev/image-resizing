@@ -19,20 +19,6 @@ export class ImageResizer implements IImageResizer {
     this.bucketName = process.env.AWS_BUCKET_NAME || "";
   }
 
-  public generatePresignedUrl(
-    bucketName: string,
-    objectKey: string,
-    expiryTime: number
-  ): string {
-    const params = {
-      Bucket: bucketName,
-      Key: objectKey,
-      Expires: expiryTime,
-    };
-
-    return this.s3.getSignedUrl("getObject", params);
-  }
-
   async resizeImage(imageData: ImageProcessingData): Promise<any> {
     try {
       // Download the image from S3
