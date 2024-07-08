@@ -10,7 +10,7 @@ import {
 import { ConversationRequestDetails } from "./Interfaces";
 
 const ConversionRequest: React.FC = () => {
-  const refreshInteval = 500;
+  const refreshInteval = 250;
   const maxFiles = 5;
   const [submitting, setSubmitting] = useState<boolean>(false);
 

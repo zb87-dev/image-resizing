@@ -90,6 +90,7 @@ To solve this, cron service is implemented that is getting pending jobs older th
 
 In order to use **stats** api, you can open http://localhost:3000/api/docs to test it using Swagger docs.
 
-At the moment, updating UI is done via polling every 500ms. In order to make UI more responsive, websockets or server sent events could be implemented.
+At the moment, updating UI is done via polling every 250ms. In order to make UI more responsive, websockets or server sent events could be implemented.
+If you want to increase polling time, Open ConversionRequest.tsx and change **refreshInteval**.
 
 When sending SQS message from worker to the api, i used already created **-failed** SQS queue, instead of the other one, since i didn't have permissions to create new queue for that purpose.
