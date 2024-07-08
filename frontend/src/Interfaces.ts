@@ -11,6 +11,7 @@ export interface Task {
 export interface ConversationRequestDetails {
   id: string;
   fileName: string;
+  filePath: string;
   fileSize: number;
   fileType: string;
   resolutions: string;

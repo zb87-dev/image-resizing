@@ -82,6 +82,9 @@ const ConversionsList: React.FC<ConversionStatusProps> = (
       {props.requests.map((taskGroup) => (
         <div key={taskGroup.id} className="task-group-card">
           <h2>{taskGroup.fileName}</h2>
+          <a href={taskGroup.filePath} target="_blank">
+            Original image
+          </a>
           <p>
             <strong>Created at:</strong>{" "}
             {new Date(taskGroup.createdAt).toLocaleString()}

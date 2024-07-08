@@ -199,6 +199,7 @@ export class ConversionService implements OnModuleInit {
         request = {
           id: curr.id,
           createdAt: curr.createdAt,
+          filePath: this.getPublicUrl(curr.filePath),
           fileName: curr.fileName,
           fileSize: curr.fileSize,
           fileType: curr.fileType,
