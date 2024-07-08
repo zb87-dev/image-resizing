@@ -28,12 +28,6 @@ export class UploadService {
 
     const uploadResult = await this.s3.upload(uploadParams).promise();
     return uploadResult.Key;
-    // console.log('UPLOAD RESULT', uploadResult);
-    // result.push(uploadResult);
-
-    // const ss = this.generatePresignedUrl(this.bucketName, uploadResult.Key, 60);
-    // console.log(ss);
-    // return result;
   }
 
   async readFileFromDisk(file: Multer.File): Promise<any> {

@@ -72,7 +72,6 @@ export class ImageResizer implements IImageResizer {
       resizedImageStream.pipe(pass);
 
       await uploadPromise;
-      console.log("Resized image:", imageData, outputKey);
 
       return Promise.resolve({ ...imageData, convertedFilePath: outputKey });
     } catch (error) {
