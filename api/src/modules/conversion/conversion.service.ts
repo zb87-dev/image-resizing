@@ -232,7 +232,7 @@ export class ConversionService implements OnModuleInit {
       return acc;
     }, []);
 
-    return groupedTasks;
+    return groupedTasks.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
   }
 
   private getPublicUrl(key: string) {
