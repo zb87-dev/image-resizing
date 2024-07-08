@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import ConversionStatus from "./ConversionStatus";
 import {
@@ -20,8 +20,12 @@ const ImageUpload: React.FC = () => {
     }
   };
 
+  const inputRef = useRef(null);
   const clearImagesAfterUpload = () => {
     setImages([]);
+    if (inputRef.current) {
+      (inputRef.current as any).value = "";
+    }
   };
 
   const [conversionRequests, setConversionRequests] = useState<
@@ -65,7 +69,6 @@ const ImageUpload: React.FC = () => {
 
     await createConversionRequest(formData);
 
-    // Clear images after upload
     clearImagesAfterUpload();
     setSubmitting(false);
   };
@@ -74,18 +77,21 @@ const ImageUpload: React.FC = () => {
     await startConversion(getUserId(), requestId, resolutions);
   };
 
+  const isUploadDisabled = images.length === 0 || submitting;
+
   return (
     <div>
       <div className="container">
-        <div className="task-group-card ">
+        <div className="task-group-card">
           <input
+            ref={inputRef}
             className="download-button"
             type="file"
             accept="image/png, image/jpeg"
             multiple
             onChange={handleImageChange}
           />
-          <button disabled={submitting} onClick={handleSubmit}>
+          <button disabled={isUploadDisabled} onClick={handleSubmit}>
             Upload
           </button>
         </div>
