@@ -76,15 +76,6 @@ describe('UploadController', () => {
       expect(response.status).toBe(400);
     });
 
-    // it('should throw an exception if resolution is not provided', async () => {
-    //   const response = await request(app.getHttpServer())
-    //     .post('/images/upload')
-    //     .field('userId', userId)
-    //     .attach('files', getFile(ImageFiles.JPG_Example_1));
-
-    //   expect(response.status).toBe(400);
-    // });
-
     it('should accept 1 file', async () => {
       const response = await request(app.getHttpServer())
         .post('/conversion')

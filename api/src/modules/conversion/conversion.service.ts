@@ -34,6 +34,10 @@ interface ConversionUpdate {
 
 @Injectable()
 export class ConversionService implements OnModuleInit {
+  private readonly MIN_FILES = 1;
+  private readonly MAX_FILES = 5;
+  private readonly SUPPORTED_FILE_TYPES = ['image/jpeg', 'image/png'];
+
   constructor(
     private readonly appConfig: AppConfigService,
     private readonly sqsService: SQSService,
@@ -48,7 +52,15 @@ export class ConversionService implements OnModuleInit {
     this.startListeningForMessages();
   }
 
-  public async create(userId: string, files: Multer.File[]): Promise<any> {
+  public async create(
+    userId: string,
+    files: Multer.File[],
+  ): Promise<{ error?: Error; response?: any }> {
+    const error = this.validateFiles(files);
+    if (error) {
+      return { error };
+    }
+
     try {
       const uploadResult = {
         success: [],
@@ -78,7 +90,7 @@ export class ConversionService implements OnModuleInit {
       // Save bulk data
       await this.conversionRequestRepository.save(conversionRequests);
 
-      return uploadResult;
+      return { response: uploadResult };
     } catch (error) {
       this.logger.error(`Failed to upload files for user ${userId}`, error.stack);
       throw new InternalServerErrorException(`Failed to create coversion request`);
@@ -261,5 +273,19 @@ export class ConversionService implements OnModuleInit {
   private async sendMessageToWorker(data: unknown): Promise<void> {
     const queueUrl = this.appConfig.getConfig().aws.sqsUrlWorker;
     await this.sqsService.sendMessage(queueUrl, JSON.stringify(data));
+  }
+
+  private validateFiles(files: Multer.File[]): BadRequestException {
+    if (!files || files.length < this.MIN_FILES || files.length > this.MAX_FILES) {
+      return new BadRequestException(
+        `Number of files uploaded must be between ${this.MIN_FILES} and ${this.MAX_FILES}.`,
+      );
+    }
+
+    for (const file of files) {
+      if (!this.SUPPORTED_FILE_TYPES.includes(file.mimetype)) {
+        return new BadRequestException(`File type ${file.mimetype} is not supported.`);
+      }
+    }
   }
 }

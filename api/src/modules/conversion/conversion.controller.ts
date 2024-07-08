@@ -23,9 +23,6 @@ import { v4 as uuidv4 } from 'uuid';
 @Controller('conversion')
 @ApiTags('Conversion')
 export class ConversionController {
-  private readonly MIN_FILES = 1;
-  private readonly MAX_FILES = 5;
-  private readonly SUPPORTED_FILE_TYPES = ['image/jpeg', 'image/png'];
   private readonly TEMP_FOLDER = join(__dirname, '.', 'tempUploads');
 
   constructor(private readonly conversionService: ConversionService) {}
@@ -48,14 +45,14 @@ export class ConversionController {
     }),
   )
   public async create(@Body('userId') userId: string, @UploadedFiles() files: Multer.File[]) {
-    this.validateFiles(files);
     const result = await this.conversionService.create(userId, files);
-    if (!result) {
-      throw new InternalServerErrorException(`Failed to upload files. Please try again later.`);
+    if (result.error) {
+      this.deleteFiles(files);
+      throw result.error;
     }
 
     this.deleteFiles(files);
-    return result;
+    return result.response;
   }
 
   @Get()
@@ -85,24 +82,6 @@ export class ConversionController {
       resolutions,
     );
     return conversion;
-  }
-
-  private validateFiles(files: Multer.File[]): void {
-    if (!files || files.length < this.MIN_FILES || files.length > this.MAX_FILES) {
-      // Clean up temporary created files before throwing an exception
-      this.deleteFiles(files);
-
-      throw new BadRequestException(
-        `Number of files uploaded must be between ${this.MIN_FILES} and ${this.MAX_FILES}.`,
-      );
-    }
-
-    files.forEach((file) => {
-      if (!this.SUPPORTED_FILE_TYPES.includes(file.mimetype)) {
-        this.deleteFiles(files);
-        throw new BadRequestException(`File type ${file.mimetype} is not supported.`);
-      }
-    });
   }
 
   private async deleteFiles(files: Multer.File[]): Promise<void> {
