@@ -20,17 +20,29 @@ export class ImageProcessor implements IImageProcessor {
 
     const imageData: ImageProcessingData = JSON.parse(message.Body);
     try {
+      console.log(`Processing task ${imageData.taskId}`);
+      // Inform server that image processing has started
+      const inProgressMessage = {
+        ...imageData,
+        target: Target.SERVER,
+        status: ConversionStatus.IN_PROGRESS,
+      };
+      await this.messageBroker.sendImageProcessingUpdate({
+        message: inProgressMessage,
+      });
+
       // Resize the image
       const resizedImage = await this.imageResizer.resizeImage(imageData);
 
-      const messageToSend = {
+      // Inform server that image processing has finished
+      const processFinishedMessage = {
         ...resizedImage,
         target: Target.SERVER,
         status: ConversionStatus.COMPLETED,
       };
 
       await this.messageBroker.sendImageProcessingUpdate({
-        message: messageToSend,
+        message: processFinishedMessage,
       });
     } catch (error: any) {
       const messageToSend = {
