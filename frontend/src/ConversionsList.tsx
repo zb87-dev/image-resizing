@@ -137,6 +137,11 @@ const ConversionsList: React.FC<ConversionStatusProps> = (
                       <p>
                         <strong>Status:</strong> {task.taskStatus}
                       </p>
+                      {task.meta?.errorMessage && (
+                        <p>
+                          <strong>Error:</strong> {task.meta?.errorMessage}
+                        </p>
+                      )}
                       <p>
                         <strong>Resolution:</strong> {task.resolution}
                       </p>

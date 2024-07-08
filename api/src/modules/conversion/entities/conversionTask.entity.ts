@@ -25,6 +25,9 @@ export class ConversionTask {
   @Column({ type: 'text' })
   public status: ConversionStatus;
 
+  @Column({ type: 'jsonb' })
+  public meta?: unknown;
+
   @Column({ type: 'timestamptz' })
   public createdAt?: Date;
 

@@ -90,7 +90,6 @@ const ConversionRequest: React.FC = () => {
   const [stats, setStats] = useState<any>({});
   const handleGetStats = async () => {
     const stats = await getStats();
-    console.log(stats);
     setStats(stats);
   };
 

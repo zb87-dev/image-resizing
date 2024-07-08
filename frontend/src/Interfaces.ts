@@ -6,6 +6,9 @@ export interface Task {
   convertedFilePath: string;
   taskCreatedAt: string;
   taskUpdatedAt: string;
+  meta?: {
+    errorMessage: string;
+  };
 }
 
 export interface ConversationRequestDetails {

@@ -38,6 +38,7 @@ export class InitialDatabaseSetup1720283634361 implements MigrationInterface {
         "resolution" text NOT NULL,
         "status" text NOT NULL,
         "convertedFilePath" text,
+        "meta" jsonb,
         "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
         "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
         PRIMARY KEY ("id"),

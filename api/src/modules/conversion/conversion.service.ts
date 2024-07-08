@@ -214,17 +214,20 @@ export class ConversionService implements OnModuleInit {
       }
 
       // Add the current task detail to the tasks array
-      request.tasks.push({
-        taskRequestId: curr.taskRequestId,
-        taskId: curr.taskId,
-        resolution: curr.resolution,
-        taskStatus: curr.taskStatus,
-        convertedFilePath: curr.convertedFilePath
-          ? this.getPublicUrl(curr.convertedFilePath)
-          : null,
-        taskCreatedAt: curr.taskCreatedAt,
-        taskUpdatedAt: curr.taskUpdatedAt,
-      });
+      if (curr.taskId) {
+        request.tasks.push({
+          taskRequestId: curr.taskRequestId,
+          taskId: curr.taskId,
+          resolution: curr.resolution,
+          taskStatus: curr.taskStatus,
+          convertedFilePath: curr.convertedFilePath
+            ? this.getPublicUrl(curr.convertedFilePath)
+            : null,
+          taskCreatedAt: curr.taskCreatedAt,
+          taskUpdatedAt: curr.taskUpdatedAt,
+          meta: curr.meta,
+        });
+      }
 
       return acc;
     }, []);
@@ -288,6 +291,13 @@ export class ConversionService implements OnModuleInit {
             task.convertedFilePath = message.convertedFilePath;
             task.status = message.status;
             task.updatedAt = new Date();
+
+            if (message.status === ConversionStatus.FAILED) {
+              task.meta = {
+                errorMessage: message.errorMessage,
+              };
+            }
+
             await this.conversionTaskRepository.save(task);
             await this.updateRequestStatus(message.userId, message.requestId);
           }

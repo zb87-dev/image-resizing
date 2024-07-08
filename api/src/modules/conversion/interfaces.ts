@@ -20,4 +20,5 @@ export interface ConversionUpdate {
   mimeType: string;
   convertedFilePath: string;
   status: ConversionStatus;
+  errorMessage?: string;
 }

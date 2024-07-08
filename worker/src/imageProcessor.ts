@@ -35,7 +35,7 @@ export class ImageProcessor implements IImageProcessor {
     } catch (error: any) {
       const messageToSend = {
         ...imageData,
-        message: error.message,
+        errorMessage: error.message,
         target: Target.SERVER,
         status: ConversionStatus.FAILED,
       };

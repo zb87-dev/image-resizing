@@ -11,6 +11,7 @@ export type ConversionRequestWithStatus = ConversionRequest & {
   taskId: string;
   taskRequestId: string;
   taskStatus: string;
+  meta: unknown;
 };
 
 @Injectable()
@@ -45,6 +46,7 @@ export class ConversionRequestRepository extends Repository<ConversionRequest> {
         ct."requestId" as "taskRequestId",
         ct."status" as "taskStatus",
         ct."convertedFilePath",
+        ct."meta",
         ct."createdAt" as "taskCreatedAt",
         ct."updatedAt" as "taskUpdatedAt"
       from "conversion_request" cr
