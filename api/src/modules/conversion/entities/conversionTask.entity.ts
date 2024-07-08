@@ -15,13 +15,14 @@ export class ConversionTask {
   @Column({ type: 'uuid' })
   public requestId: string;
 
-  @Column({ type: 'jsonb' })
-  public conversionRequestInfo: any;
+  @Column({ type: 'text' })
+  public resolution: string;
+
   @Column({ type: 'text' })
   public convertedFilePath?: string;
 
   @Column({ type: 'text' })
-  public status: string;
+  public status = 'pending' || 'completed' || 'failed';
 
   @Column({ type: 'timestamptz' })
   public createdAt?: Date;

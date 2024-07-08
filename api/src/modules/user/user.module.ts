@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Logger, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import dataSource from '../../database/typeOrm.config';
 import dbConfig from '../../database/dbConfig';
@@ -16,7 +16,7 @@ import { UserRepository } from './repository/user.repository';
     }),
   ],
   controllers: [],
-  providers: [UserService, UserRepository],
+  providers: [UserService, UserRepository, Logger],
   exports: [UserService],
 })
 export class UserModule {}

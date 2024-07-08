@@ -37,7 +37,7 @@ describe('UploadController', () => {
     app = moduleFixture.createNestApplication();
     await app.init();
 
-    userId = uuidv4();
+    userId = '0444910d-400c-4535-8b27-0c839e549cfb'; //uuidv4();
   });
 
   afterAll(async () => {
@@ -87,12 +87,19 @@ describe('UploadController', () => {
       expect(response.status).toBe(400);
     });
 
-    it('should accept 1 file', async () => {
+    it.only('should accept 1 file', async () => {
+      // const response = await request(app.getHttpServer())
+      //   .post('/images/upload')
+      //   .field('userId', userId)
+      //   .field('resolutions', ['640x480'])
+      //   .attach('files', getFile(ImageFiles.JPG_Example_1));
+
       const response = await request(app.getHttpServer())
         .post('/images/upload')
         .field('userId', userId)
-        .field('resolutions', ['640x480'])
-        .attach('files', getFile(ImageFiles.JPG_Example_1));
+        .field('resolutions', ['1920x1080', '1280x720', '640x480'])
+        .attach('files', getFile(ImageFiles.JPG_Example_1))
+        .attach('files', getFile(ImageFiles.JPG_Example_2));
 
       expect(response.status).toBe(201);
     });

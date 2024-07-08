@@ -2,10 +2,13 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   InternalServerErrorException,
+  Param,
   Post,
+  Query,
   UploadedFiles,
   UseInterceptors,
 } from '@nestjs/common';
@@ -17,8 +20,8 @@ import { join } from 'path';
 import { unlink } from 'fs';
 import { v4 as uuidv4 } from 'uuid';
 
-@Controller('images')
-@ApiTags('Images')
+@Controller('conversion')
+@ApiTags('Conversion')
 export class ConversionController {
   private readonly MIN_FILES = 1;
   private readonly MAX_FILES = 5;
@@ -27,11 +30,11 @@ export class ConversionController {
 
   constructor(private readonly conversionService: ConversionService) {}
 
-  @Post('upload')
+  @Post()
   @HttpCode(HttpStatus.CREATED)
   @ApiResponse({
-    status: 200,
-    description: 'Returns value indicating that the upload was successful.',
+    status: 201,
+    description: 'Returns value indicating that the conversion request is created successfully',
   })
   @UseInterceptors(
     FilesInterceptor('files', null, {
@@ -44,17 +47,9 @@ export class ConversionController {
       }),
     }),
   )
-  async uploadFiles(
-    @Body('userId') userId: string,
-    @Body('resolutions') resolutions: string,
-    @UploadedFiles() files: Multer.File[],
-  ) {
-    // Ensure resolutions is an array of strings
-    const resolutionsArray = JSON.parse(resolutions);
-
-    this.validateFiles(resolutionsArray, files);
-
-    const result = await this.conversionService.createConversion(userId, resolutionsArray, files);
+  public async create(@Body('userId') userId: string, @UploadedFiles() files: Multer.File[]) {
+    this.validateFiles(files);
+    const result = await this.conversionService.create(userId, files);
     if (!result) {
       throw new InternalServerErrorException(`Failed to upload files. Please try again later.`);
     }
@@ -63,7 +58,36 @@ export class ConversionController {
     return result;
   }
 
-  private validateFiles(resolutions: unknown[], files: Multer.File[]): void {
+  @Get()
+  @HttpCode(HttpStatus.OK)
+  @ApiResponse({
+    status: 20,
+    description: 'Returns the list of conversion requests for the specified user',
+  })
+  public async getConversionRequests(@Query('userId') userId: string) {
+    return this.conversionService.getConversionRequests(userId);
+  }
+
+  @Post(`:conversionId/start`)
+  @HttpCode(HttpStatus.OK)
+  @ApiResponse({
+    status: 20,
+    description: 'Returns the list of conversion requests for the specified user',
+  })
+  public async startConversion(
+    @Param('conversionId') conversionId: string,
+    @Body('resolutions') resolutions: string[],
+    @Body('userId') userId: string,
+  ) {
+    const conversion = await this.conversionService.startConversion(
+      userId,
+      conversionId,
+      resolutions,
+    );
+    return conversion;
+  }
+
+  private validateFiles(files: Multer.File[]): void {
     if (!files || files.length < this.MIN_FILES || files.length > this.MAX_FILES) {
       // Clean up temporary created files before throwing an exception
       this.deleteFiles(files);
@@ -79,11 +103,6 @@ export class ConversionController {
         throw new BadRequestException(`File type ${file.mimetype} is not supported.`);
       }
     });
-
-    if (!resolutions || resolutions.length === 0) {
-      this.deleteFiles(files);
-      throw new BadRequestException(`Resolutions must be provided.`);
-    }
   }
 
   private async deleteFiles(files: Multer.File[]): Promise<void> {

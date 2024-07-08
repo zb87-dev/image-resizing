@@ -21,11 +21,14 @@ export class ConversionRequest {
   @Column({ type: 'text' })
   public fileType: string;
 
-  @Column({ type: 'jsonb' })
-  public conversionRequestInfo: any;
-
   @Column({ type: 'text' })
   public filePath: string;
+
+  @Column({ type: 'text' })
+  public status = 'pending' || 'completed' || 'failed';
+
+  @Column({ type: 'text' })
+  public resolutions: string;
 
   @Column({ type: 'timestamptz' })
   public createdAt?: Date;
