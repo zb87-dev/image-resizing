@@ -84,6 +84,16 @@ export class ConversionController {
     return conversion;
   }
 
+  @Get('stats')
+  @HttpCode(HttpStatus.OK)
+  @ApiResponse({
+    status: 20,
+    description: 'Returns statistics for the conversion service',
+  })
+  public async getStats() {
+    return this.conversionService.getStats();
+  }
+
   private async deleteFiles(files: Multer.File[]): Promise<void> {
     if (!files) {
       return;

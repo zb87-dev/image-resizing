@@ -34,6 +34,7 @@ interface ConversionUpdate {
 
 @Injectable()
 export class ConversionService implements OnModuleInit {
+  private totalImagesUploadSize = 0;
   private readonly MIN_FILES = 1;
   private readonly MAX_FILES = 5;
   private readonly SUPPORTED_FILE_TYPES = ['image/jpeg', 'image/png'];
@@ -50,6 +51,16 @@ export class ConversionService implements OnModuleInit {
 
   onModuleInit() {
     this.startListeningForMessages();
+  }
+
+  public async getStats(): Promise<{
+    totalImagesUploadSizeInBytes: number;
+    totalImagesUploadSizeInMB: number;
+  }> {
+    return {
+      totalImagesUploadSizeInBytes: this.totalImagesUploadSize,
+      totalImagesUploadSizeInMB: Math.round((this.totalImagesUploadSize / 1024 / 1024) * 100) / 100,
+    };
   }
 
   public async create(
@@ -78,6 +89,7 @@ export class ConversionService implements OnModuleInit {
           conversionRequests.push(conversionRequest);
           await this.uploadFileToS3(conversionRequest.filePath, file);
           uploadResult.success.push(conversionRequest);
+          this.totalImagesUploadSize += file.size;
         } catch (error) {
           this.logger.error(`Failed to upload files for user ${userId}`, error.stack);
           uploadResult.error.push({ file: file.filename, error: error.message });

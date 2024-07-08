@@ -88,6 +88,8 @@ In order to run e2e tests, open **api** folder and create test.env with appropri
 Sometimes SQS messages are lost, so from time to time there are stuck conversion jobs in the pending state.
 To solve this, cron service is implemented that is getting pending jobs older than 1 minute and resends them to the SQS.
 
+In order to use **stats** api, you can open http://localhost:3000/api/docs to test it using Swagger docs.
+
 At the moment, updating UI is done via polling every 500ms. In order to make UI more responsive, websockets or server sent events could be implemented.
 
 When sending SQS message from worker to the api, i used already created **-failed** SQS queue, instead of the other one, since i didn't have permissions to create new queue for that purpose.
