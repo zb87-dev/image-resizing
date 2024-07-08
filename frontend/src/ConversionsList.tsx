@@ -125,9 +125,8 @@ const ConversionsList: React.FC<ConversionStatusProps> = (
                       <strong>Converted File:</strong>{" "}
                       <a
                         href={task.convertedFilePath}
-                        download
+                        download={task.convertedFilePath}
                         target="_blank"
-                        rel="noopener noreferrer"
                       >
                         Download
                       </a>
