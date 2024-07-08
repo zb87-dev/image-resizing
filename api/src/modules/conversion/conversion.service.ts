@@ -117,7 +117,7 @@ export class ConversionService implements OnModuleInit {
     const tasks = resolutions.map((resolution) => {
       const task = this.createConversionTask(userId, conversionId, resolution);
       const message = {
-        target: 'worker',
+        target: Target.WORKER,
         userId: userId,
         requestId: conversion.id,
         taskId: task.id,
@@ -156,7 +156,7 @@ export class ConversionService implements OnModuleInit {
     const messages = [];
     for (const task of pendingTasks) {
       const message = {
-        target: 'worker',
+        target: Target.WORKER,
         userId: task.userId,
         requestId: task.requestId,
         taskId: task.taskId,
@@ -213,18 +213,18 @@ export class ConversionService implements OnModuleInit {
         acc.push(request);
       }
 
-      if (curr.convertedFilePath) {
-        // Add the current task detail to the tasks array
-        request.tasks.push({
-          taskRequestId: curr.taskRequestId,
-          taskId: curr.taskId,
-          resolution: curr.resolution,
-          taskStatus: curr.taskStatus,
-          convertedFilePath: this.getPublicUrl(curr.convertedFilePath),
-          taskCreatedAt: curr.taskCreatedAt,
-          taskUpdatedAt: curr.taskUpdatedAt,
-        });
-      }
+      // Add the current task detail to the tasks array
+      request.tasks.push({
+        taskRequestId: curr.taskRequestId,
+        taskId: curr.taskId,
+        resolution: curr.resolution,
+        taskStatus: curr.taskStatus,
+        convertedFilePath: curr.convertedFilePath
+          ? this.getPublicUrl(curr.convertedFilePath)
+          : null,
+        taskCreatedAt: curr.taskCreatedAt,
+        taskUpdatedAt: curr.taskUpdatedAt,
+      });
 
       return acc;
     }, []);
@@ -287,6 +287,7 @@ export class ConversionService implements OnModuleInit {
             const task = await this.conversionTaskRepository.getTaskById(message.taskId);
             task.convertedFilePath = message.convertedFilePath;
             task.status = message.status;
+            task.updatedAt = new Date();
             await this.conversionTaskRepository.save(task);
             await this.updateRequestStatus(message.userId, message.requestId);
           }

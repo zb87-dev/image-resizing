@@ -135,19 +135,24 @@ const ConversionsList: React.FC<ConversionStatusProps> = (
                   {taskGroup.tasks.map((task) => (
                     <li key={task.taskId} className="task-item">
                       <p>
-                        <strong>Resolution:</strong> {task.resolution}
+                        <strong>Status:</strong> {task.taskStatus}
                       </p>
                       <p>
-                        <strong>Converted File:</strong>{" "}
-                        <a
-                          href={task.convertedFilePath}
-                          download={task.convertedFilePath}
-                          rel="noreferrer"
-                          target="_blank"
-                        >
-                          Download
-                        </a>
+                        <strong>Resolution:</strong> {task.resolution}
                       </p>
+                      {task.convertedFilePath && (
+                        <p>
+                          <strong>Converted File:</strong>{" "}
+                          <a
+                            href={task.convertedFilePath}
+                            download={task.convertedFilePath}
+                            rel="noreferrer"
+                            target="_blank"
+                          >
+                            Download
+                          </a>
+                        </p>
+                      )}
                     </li>
                   ))}
                 </ul>

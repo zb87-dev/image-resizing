@@ -18,9 +18,8 @@ export class ImageProcessor implements IImageProcessor {
       return false;
     }
 
+    const imageData: ImageProcessingData = JSON.parse(message.Body);
     try {
-      const imageData: ImageProcessingData = JSON.parse(message.Body);
-
       // Resize the image
       const resizedImage = await this.imageResizer.resizeImage(imageData);
 
@@ -33,11 +32,18 @@ export class ImageProcessor implements IImageProcessor {
       await this.messageBroker.sendImageProcessingUpdate({
         message: messageToSend,
       });
-    } catch (error) {
-      await this.messageBroker.setImageProcessingFailure({
-        message,
-        error,
+    } catch (error: any) {
+      const messageToSend = {
+        ...imageData,
+        message: error.message,
+        target: Target.SERVER,
+        status: ConversionStatus.FAILED,
+      };
+
+      await this.messageBroker.sendImageProcessingUpdate({
+        message: messageToSend,
       });
+
       console.error("Error processing image:", error);
       return false;
     }
