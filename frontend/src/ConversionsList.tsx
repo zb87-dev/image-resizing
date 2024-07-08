@@ -78,76 +78,84 @@ const ConversionsList: React.FC<ConversionStatusProps> = (
   };
 
   return (
-    <div className="container">
-      {props.requests.map((taskGroup) => (
-        <div key={taskGroup.id} className="task-group-card">
-          <h2>{taskGroup.fileName}</h2>
-          <a href={taskGroup.filePath} target="_blank">
-            Original image
-          </a>
-          <p>
-            <strong>Created at:</strong>{" "}
-            {new Date(taskGroup.createdAt).toLocaleString()}
-          </p>
-          <p>
-            <strong>Status:</strong> {taskGroup.status}
-          </p>
-          {isConversionPending(taskGroup) && (
+    <div>
+      {props.requests.length === 0 ? (
+        <h4 className="empty-list">
+          No conversion requests found. Please upload files to start conversion
+        </h4>
+      ) : (
+        props.requests.map((taskGroup) => (
+          <div key={taskGroup.id} className="task-group-card">
+            <h2>{taskGroup.fileName}</h2>
+            <a href={taskGroup.filePath} target="_blank" rel="noreferrer">
+              Original image
+            </a>
             <p>
-              {resolutionsOptions.map((resolution) => (
-                <label key={resolution}>
-                  <input
-                    disabled={isDisabled(taskGroup)}
-                    type="checkbox"
-                    value={resolution}
-                    onChange={(val) => handleResolutionChange(taskGroup, val)}
-                  />
-                  {resolution}
-                </label>
-              ))}
-              <button
-                className="convert-button"
-                disabled={
-                  isDisabled(taskGroup) ||
-                  !selectedResolutions.find((x) => x.requestId === taskGroup.id)
-                    ?.resolutions.length
-                }
-                onClick={() => handleConvert(taskGroup)}
-              >
-                Convert
-              </button>
-              <span className="info-message">
-                Please pick resolution(s) before starting conversion
-              </span>
+              <strong>Created at:</strong>{" "}
+              {new Date(taskGroup.createdAt).toLocaleString()}
             </p>
-          )}
-
-          {taskGroup.tasks.length > 0 && (
-            <div>
-              <h3>Finished conversions</h3>
-              <ul className="task-list">
-                {taskGroup.tasks.map((task) => (
-                  <li key={task.taskId} className="task-item">
-                    <p>
-                      <strong>Resolution:</strong> {task.resolution}
-                    </p>
-                    <p>
-                      <strong>Converted File:</strong>{" "}
-                      <a
-                        href={task.convertedFilePath}
-                        download={task.convertedFilePath}
-                        target="_blank"
-                      >
-                        Download
-                      </a>
-                    </p>
-                  </li>
+            <p>
+              <strong>Status:</strong> {taskGroup.status}
+            </p>
+            {isConversionPending(taskGroup) && (
+              <p>
+                {resolutionsOptions.map((resolution) => (
+                  <label key={resolution}>
+                    <input
+                      disabled={isDisabled(taskGroup)}
+                      type="checkbox"
+                      value={resolution}
+                      onChange={(val) => handleResolutionChange(taskGroup, val)}
+                    />
+                    {resolution}
+                  </label>
                 ))}
-              </ul>
-            </div>
-          )}
-        </div>
-      ))}
+                <button
+                  className="convert-button"
+                  disabled={
+                    isDisabled(taskGroup) ||
+                    !selectedResolutions.find(
+                      (x) => x.requestId === taskGroup.id
+                    )?.resolutions.length
+                  }
+                  onClick={() => handleConvert(taskGroup)}
+                >
+                  Convert
+                </button>
+                <span className="info-message">
+                  Please pick resolution(s) before starting conversion
+                </span>
+              </p>
+            )}
+
+            {taskGroup.tasks.length > 0 && (
+              <div>
+                <h3>Finished conversions</h3>
+                <ul className="task-list">
+                  {taskGroup.tasks.map((task) => (
+                    <li key={task.taskId} className="task-item">
+                      <p>
+                        <strong>Resolution:</strong> {task.resolution}
+                      </p>
+                      <p>
+                        <strong>Converted File:</strong>{" "}
+                        <a
+                          href={task.convertedFilePath}
+                          download={task.convertedFilePath}
+                          rel="noreferrer"
+                          target="_blank"
+                        >
+                          Download
+                        </a>
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        ))
+      )}
     </div>
   );
 };

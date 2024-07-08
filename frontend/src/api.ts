@@ -30,3 +30,8 @@ export const startConversion = async (
     }
   );
 };
+
+export const getStats = async () => {
+  const response = await axios.get(`${config.API_URL}/api/v1/conversion/stats`);
+  return response.data;
+};

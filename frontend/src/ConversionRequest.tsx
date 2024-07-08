@@ -5,6 +5,7 @@ import {
   createConversionRequest,
   getConversionRequests,
   startConversion,
+  getStats,
 } from "./api";
 import { ConversationRequestDetails } from "./Interfaces";
 
@@ -86,12 +87,32 @@ const ConversionRequest: React.FC = () => {
     await startConversion(getUserId(), requestId, resolutions);
   };
 
+  const [stats, setStats] = useState<any>({});
+  const handleGetStats = async () => {
+    const stats = await getStats();
+    console.log(stats);
+    setStats(stats);
+  };
+
   const isUploadDisabled = images.length === 0 || submitting;
 
   return (
     <div>
       <div className="container">
-        <div className="task-group-card">
+        <h2>Image resizer</h2>
+        <p>
+          Image Resizer is a web application designed to help users quickly and
+          easily upload images and convert them into multiple desired
+          resolutions.
+        </p>
+        <p>
+          <button onClick={handleGetStats}>
+            {stats.totalImagesUploadSizeInMB !== undefined
+              ? `Total uploads: ${stats.totalImagesUploadSizeInMB} MB (Click to refresh)`
+              : `Click to get stats`}
+          </button>
+        </p>
+        <div className="wrapper">
           <input
             ref={inputRef}
             type="file"
@@ -103,12 +124,12 @@ const ConversionRequest: React.FC = () => {
             Upload
           </button>
           {error && <div className="error">{error}</div>}
+          <ConversionsList
+            requests={conversionRequests}
+            handleConvert={handleConvert}
+          />
         </div>
       </div>
-      <ConversionsList
-        requests={conversionRequests}
-        handleConvert={handleConvert}
-      />
     </div>
   );
 };
