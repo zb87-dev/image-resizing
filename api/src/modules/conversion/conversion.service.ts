@@ -45,47 +45,7 @@ export class ConversionService implements OnModuleInit {
   ) {}
 
   onModuleInit() {
-    this.startListening();
-  }
-
-  async startListening() {
-    while (true) {
-      const queueUrl = this.appConfig.getConfig().aws.sqsUrlServer;
-      const data = await this.sqsService.receiveMessage(queueUrl);
-      if (!data) {
-        continue;
-      }
-
-      for (const message of data.Messages) {
-        if (!message) {
-          continue;
-        }
-        const receiptHandle = message.ReceiptHandle;
-        const body = message.Body;
-        if (!body) {
-          continue;
-        }
-
-        try {
-          const data = JSON.parse(body);
-
-          if (data.message && data.message.target === 'server') {
-            const message: ConversionUpdate = data.message;
-
-            await this.sqsService.deleteMessage(queueUrl, receiptHandle);
-
-            const task = await this.conversionTaskRepository.getTaskById(message.taskId);
-            task.convertedFilePath = message.convertedFilePath;
-            task.status = message.status;
-            await this.conversionTaskRepository.save(task);
-          }
-
-          // Process the message
-        } catch (error) {
-          this.logger.error('Failed to parse message body', error.stack);
-        }
-      }
-    }
+    this.startListeningForMessages();
   }
 
   public async create(userId: string, files: Multer.File[]): Promise<any> {
@@ -224,6 +184,46 @@ export class ConversionService implements OnModuleInit {
 
     const bucketName = this.appConfig.getConfig().aws.bucketName;
     return this.uploadService.generatePresignedUrl(bucketName, key, 60);
+  }
+
+  private async startListeningForMessages() {
+    while (true) {
+      const queueUrl = this.appConfig.getConfig().aws.sqsUrlServer;
+      const data = await this.sqsService.receiveMessage(queueUrl);
+      if (!data) {
+        continue;
+      }
+
+      for (const message of data.Messages) {
+        if (!message) {
+          continue;
+        }
+        const receiptHandle = message.ReceiptHandle;
+        const body = message.Body;
+        if (!body) {
+          continue;
+        }
+
+        try {
+          const data = JSON.parse(body);
+
+          if (data.message && data.message.target === 'server') {
+            const message: ConversionUpdate = data.message;
+
+            await this.sqsService.deleteMessage(queueUrl, receiptHandle);
+
+            const task = await this.conversionTaskRepository.getTaskById(message.taskId);
+            task.convertedFilePath = message.convertedFilePath;
+            task.status = message.status;
+            await this.conversionTaskRepository.save(task);
+          }
+
+          // Process the message
+        } catch (error) {
+          this.logger.error('Failed to parse message body', error.stack);
+        }
+      }
+    }
   }
 
   private createConversionRequest(userId: string, file: Multer.File): ConversionRequest {
