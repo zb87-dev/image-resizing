@@ -22,14 +22,14 @@ export class ImageProcessor implements IImageProcessor {
     try {
       console.log(`Processing task ${imageData.taskId}`);
       // Inform server that image processing has started
-      const inProgressMessage = {
-        ...imageData,
-        target: Target.SERVER,
-        status: ConversionStatus.IN_PROGRESS,
-      };
-      await this.messageBroker.sendImageProcessingUpdate({
-        message: inProgressMessage,
-      });
+      // const inProgressMessage = {
+      //   ...imageData,
+      //   target: Target.SERVER,
+      //   status: ConversionStatus.IN_PROGRESS,
+      // };
+      // await this.messageBroker.sendImageProcessingUpdate({
+      //   message: inProgressMessage,
+      // });
 
       // Resize the image
       const resizedImage = await this.imageResizer.resizeImage(imageData);

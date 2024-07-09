@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { ConversationRequestDetails, ConversionStatus } from "./Interfaces";
+import Spinner from "./Spinner";
 
 type ConversionStatusProps = {
   requests: ConversationRequestDetails[];
@@ -76,6 +77,10 @@ const ConversionsList: React.FC<ConversionStatusProps> = (
     return request.status === ConversionStatus.PENDING;
   };
 
+  const isConversionCompleted = (status: ConversionStatus) => {
+    return status === ConversionStatus.COMPLETED;
+  };
+
   return (
     <div>
       {props.requests.length === 0 ? (
@@ -129,13 +134,22 @@ const ConversionsList: React.FC<ConversionStatusProps> = (
 
             {taskGroup.tasks.length > 0 && (
               <div>
-                <h3>Finished conversions</h3>
+                <h3>Conversions</h3>
                 <ul className="task-list">
                   {taskGroup.tasks.map((task) => (
                     <li key={task.taskId} className="task-item">
-                      <p>
-                        <strong>Status:</strong> {task.taskStatus}
-                      </p>
+                      <div className="task-status">
+                        <strong>Status:</strong>
+                        {!isConversionCompleted(task.taskStatus) ? (
+                          <span className="task-status-padding">
+                            <Spinner />
+                          </span>
+                        ) : (
+                          " "
+                        )}
+                        <span className="status-info">{task.taskStatus}</span>
+                      </div>
+
                       {task.meta?.errorMessage && (
                         <p>
                           <strong>Error:</strong> {task.meta?.errorMessage}
